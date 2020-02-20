@@ -1,10 +1,10 @@
+import contextlib
 import json
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
-from kubernetes import client
-from kubernetes.client.rest import ApiException
+from kubernetes import client, config
 
 PULL_POLICY = [
     'Always',
@@ -26,9 +26,29 @@ class KubernetesBase(models.Model):
     description = models.CharField(max_length=128, null=True, blank=True)
     cluster = models.ForeignKey('TargetCluster', on_delete=models.SET_NULL, null=True)
     config = models.JSONField(default=dict, null=True, blank=True)
+
     class Meta:
         abstract = True
 
+    def get_client(self, API=client.CoreV1Api, **kwargs):
+        """Gets a k8s api client based on the credential associated with this JobInstance
+
+            Args:
+                API (client.<type>) - Kubernetes Client Type
+            Returns:
+                object of type <API>
+        """
+        if "persist_config" not in kwargs:
+            kwargs["persist_config"] = False
+        with NamedTemporaryFile() as ntf:
+            kwargs["config_file"] = ntf.name
+            if isinstance(self.cluster.config, dict):
+                cc = json.dumps(self.cluster.config)
+            else:
+                cc = self.cluster.config
+            with open(ntf.name, "w") as f:
+                f.write(cc)
+            yield API(api_client=config.new_client_from_config(**kwargs))
 
 
 class KubernetesVolume(KubernetesBase):
@@ -112,7 +132,7 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
 class KubernetesNetworkingBase(KubernetesMetadataObjBase):
     api_version = models.CharField(max_length=16, default="v1")
     kind = models.CharField(max_length=16, default="Service")
-    target_port = models.IntegerField(default=80)
+    port = models.IntegerField(default=80)
 
     class Meta:
         abstract= True
@@ -121,7 +141,6 @@ class KubernetesNetworkingBase(KubernetesMetadataObjBase):
 
 class KubernetesService(KubernetesNetworkingBase):
     selector = models.JSONField(default=dict)
-    port = models.IntegerField(default=80)
 
     def get_obj(self):
         return client.V1Service(
@@ -145,4 +164,28 @@ class KubernetesService(KubernetesNetworkingBase):
 class KubernetesIngress(KubernetesNetworkingBase):
     hostname = models.CharField(max_length=255, default="localhost")
     path = models.CharField(max_length=255, default="/")
-    target_service = models.ForeignKey('KubernetesService', )
+    target_service = models.ForeignKey('KubernetesService', on_delete=models.CASCADE)
+
+    def get_obj(self):
+        return client.NetworkingV1beta1Ingress(
+            api_version=self.api_version,
+            kind=self.kind,
+            metadata=client.V1ObjectMeta(
+                name=self.name,
+                annotations=self.annotations
+            ),
+            spec=client.NetworkingV1beta1IngressSpec(
+                rules=[client.NetworkingV1beta1IngressRule(
+                    host=self.hostname,
+                    http=client.NetworkingV1beta1HTTPIngressRuleValue(
+                        paths=[client.NetworkingV1beta1HTTPIngressPath(
+                            path=self.path,
+                            backend=client.NetworkingV1beta1IngressBackend(
+                                service_port=self.target_service.port,
+                                service_name=self.target_service.name
+                            )
+                        )]
+                    )
+                )]
+            )
+        )
