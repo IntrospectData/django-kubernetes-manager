@@ -60,6 +60,6 @@ class TargetCluster(TitleDescriptionModel):
             log.warning("No clusters added")
         return ret_val
 
-    class Meta(UUIDAuditModelBase.Meta):
-        verbose_name = "Target Cluster"
-        verbose_name_plural = "Target Clusters"
+    # class Meta(UUIDAuditModelBase.Meta):
+    #     verbose_name = "Target Cluster"
+    #     verbose_name_plural = "Target Clusters"

@@ -6,7 +6,6 @@ from datetime import datetime
 
 import yaml
 
-from celery import shared_task
 from kubernetes import client, config
 import re
 

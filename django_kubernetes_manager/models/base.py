@@ -4,18 +4,19 @@ import json
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
+from uuid import uuid4
 from kubernetes import client, config
 
 PULL_POLICY = [
-    'Always',
-    'IfNotPresent',
-    'Never'
+    ('Always', 'Always'),
+    ('IfNotPresent', 'IfNotPresent'),
+    ('Never', 'Never')
 ]
 
 RESTART_POLICY = [
-    'Always',
-    'OnFailure',
-    'Never'
+    ('Always', 'Always'),
+    ('OnFailure', 'OnFailure'),
+    ('Never', 'Never')
 ]
 
 
@@ -25,7 +26,7 @@ class KubernetesBase(models.Model):
     name = models.CharField(max_length=128, default="kubernetes-object")
     description = models.CharField(max_length=128, null=True, blank=True)
     cluster = models.ForeignKey('TargetCluster', on_delete=models.SET_NULL, null=True)
-    config = models.JSONField(default=dict, null=True, blank=True)
+    config = JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -101,8 +102,8 @@ class KubernetesContainer(KubernetesBase):
 
 
 class KubernetesMetadataObjBase(KubernetesBase):
-    labels = models.JSONField(default={'app': 'default'})
-    annotations = models.JSONFIELD(default=dict, null=True, blank=True)
+    labels = JSONField(default=dict)
+    annotations = JSONField(default=dict, null=True, blank=True)
 
     class Meta:
         abstract = True
@@ -133,6 +134,7 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
 
 
 
+
 class KubernetesNetworkingBase(KubernetesMetadataObjBase):
     api_version = models.CharField(max_length=16, default="v1")
     kind = models.CharField(max_length=16, default="Service")
@@ -143,9 +145,31 @@ class KubernetesNetworkingBase(KubernetesMetadataObjBase):
 
 
 
-class KubernetesService(KubernetesNetworkingBase):
-    selector = models.JSONField(default=dict)
+class KubernetesDeployment(KubernetesNetworkingBase):
+    selector = JSONField(default=dict)
+    replicas = models.IntegerField(default=1)
+    pod_template = models.ForeignKey('KubernetesPodTemplate', on_delete=models.CASCADE)
 
+    def get_obj(self):
+        return self.client.V1Deployment(
+            api_version=self.api_version,
+            kind=self.kind,
+            metadata=self.client.V1ObjectMeta(
+                labels=json.loads(self.labels),
+                annotations=json.loads(self.labels)
+            ),
+            spec=self.client.V1DeploymentSpec(
+                selector=json.loads(self.selector),
+                replicas=self.replicas,
+                template=self.pod_template.get_obj()
+            )
+        )
+
+
+
+class KubernetesService(KubernetesNetworkingBase):
+    selector = JSONField(default=dict)
+    target_port = models.IntegerField(default=80)
     def get_obj(self):
         return self.client.V1Service(
             api_version = self.api_version,
@@ -155,7 +179,7 @@ class KubernetesService(KubernetesNetworkingBase):
                 annotations=json.loads(self.annotations)
             ),
             spec=self.client.V1ServiceSpec(
-                selector = self.selector,
+                selector = json.loads(self.selector),
                 ports = [self.client.V1ServicePort(
                     port=self.port,
                     target_port=self.target_port

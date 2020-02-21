@@ -8,5 +8,8 @@ verify_ssl = true
 [packages]
 kubernetes ="*"
 django ="*"
+psycopg2 ="*"
+django_extensions ='*'
+
 [requires]
 python_version = "3.7"
