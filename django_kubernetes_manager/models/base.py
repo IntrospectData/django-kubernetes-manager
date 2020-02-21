@@ -217,3 +217,24 @@ class KubernetesIngress(KubernetesNetworkingBase):
                 )]
             )
         )
+
+
+
+class KubernetesJob(KubernetesNetworkingBase):
+    pod_template = models.ForeignKey('KubernetesPodTemplate', on_delete=models.CASCADE)
+    backoff_limit = models.IntegerField(default=3)
+
+    def get_obj(self):
+        return self.client.V1Job(
+            api_version=self.api_version,
+            kind=self.kind,
+            metadata=self.client.V1ObjectMeta(
+                name = self.name,
+                labels = json.loads(self.labels),
+                annotations = json.loads(self.annotations)
+            ),
+            spec=self.client.V1JobSpec(
+                template=self.pod_template.get_obj(),
+                backoff_limit=self.backoff_limits
+            )
+        )
