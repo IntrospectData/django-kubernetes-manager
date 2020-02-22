@@ -76,10 +76,15 @@ WSGI_APPLICATION = 'dkm.wsgi.application'
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    "default": {
+        "ENGINE": os.getenv("DATABASE_ENGINE", "django.db.backends.postgresql"),
+        "NAME": os.getenv("DATABASE_NAME", "webapp-db"),
+        "HOST": os.getenv("DATABASE_HOST", "localhost"),
+        "PORT": os.getenv("DATABASE_PORT", 5432),
+        "USER": os.getenv("DATABASE_USER", "webapp-user"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD", "webapp-password"),
+        "CONN_MAX_AGE": 0,
+    },
 }
 
 

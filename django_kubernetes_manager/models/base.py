@@ -1,4 +1,3 @@
-import contextlib
 import json
 
 from django.contrib.postgres.fields import JSONField
@@ -6,6 +5,7 @@ from django.db import models
 
 from uuid import uuid4
 from kubernetes import client, config
+from tempfile import NamedTemporaryFile
 
 PULL_POLICY = [
     ('Always', 'Always'),
@@ -73,7 +73,6 @@ class KubernetesBase(models.Model):
     class Meta:
         abstract = True
 
-    @contextlib.contextmanager
     def get_client(self, API=client.CoreV1Api, **kwargs):
         """Gets a k8s api client based on the credential associated with this JobInstance
 
@@ -92,16 +91,14 @@ class KubernetesBase(models.Model):
                 cc = self.cluster.config
             with open(ntf.name, "w") as f:
                 f.write(cc)
-            yield API(api_client=config.new_client_from_config(**kwargs))
-
-    client = property(get_client)
+            return API(api_client=config.new_client_from_config(**kwargs))
 
 
 
 class KubernetesVolume(KubernetesBase):
 
     def get_obj(self):
-        return self.client.V1Volume(
+        return self.get_client().V1Volume(
             name=self.name,
             empty_dir={}
         )
@@ -113,7 +110,7 @@ class KubernetesVolumeMount(KubernetesBase):
     sub_path = models.CharField(max_length=255, default=None, null=True, blank=True)
 
     def get_obj(self):
-        return self.client.V1VolumeMount(
+        return self.get_client().V1VolumeMount(
             name=self.name,
             mount_path=self.mount_path,
             sub_path=slef.sub_path
@@ -131,11 +128,11 @@ class KubernetesContainer(KubernetesBase):
     volume_mount = models.ForeignKey('KubernetesVolumeMount', null=True, blank=True, on_delete=models.SET_NULL)
 
     def get_obj(self):
-        return self.client.V1Container(
+        return self.get_client().V1Container(
             name = self.name,
             image = ':'.join(self.image_name, self.image_tag),
             image_pull_policy = self.image_pull_policy,
-            ports = [self.client.V1ContainerPort(container_port=self.port)],
+            ports = [self.get_client().V1ContainerPort(container_port=self.port)],
             volume_mounts = [self.volume_mount.get_obj()],
             command = [self.command],
             args = [self.args.split(",")]
@@ -159,12 +156,12 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
     restart_policy = models.CharField(max_length=16, choices=RESTART_POLICY, default='Never')
 
     def get_obj(self):
-        return self.client.V1PodTemplateSpec(
-            metadata=self.client.V1ObjectMeta(
+        return self.get_client().V1PodTemplateSpec(
+            metadata=self.get_client().V1ObjectMeta(
                 labels=json.loads(self.labels),
                 annotations=json.loads(self.annotations)
             ),
-            spec=self.client.V1PodSpec(
+            spec=self.get_client().V1PodSpec(
                 volumes=[self.volume.get_obj()],
                 containers=[
                     self.primary_container.get_obj(),
@@ -193,14 +190,14 @@ class KubernetesDeployment(KubernetesNetworkingBase):
     pod_template = models.ForeignKey('KubernetesPodTemplate', on_delete=models.CASCADE)
 
     def get_obj(self):
-        return self.client.V1Deployment(
+        return self.get_client().V1Deployment(
             api_version=self.api_version,
             kind=self.kind,
-            metadata=self.client.V1ObjectMeta(
+            metadata=self.get_client().V1ObjectMeta(
                 labels=json.loads(self.labels),
                 annotations=json.loads(self.labels)
             ),
-            spec=self.client.V1DeploymentSpec(
+            spec=self.get_client().V1DeploymentSpec(
                 selector=json.loads(self.selector),
                 replicas=self.replicas,
                 template=self.pod_template.get_obj()
@@ -213,16 +210,16 @@ class KubernetesService(KubernetesNetworkingBase):
     selector = JSONField(default=dict)
     target_port = models.IntegerField(default=80)
     def get_obj(self):
-        return self.client.V1Service(
+        return self.get_client().V1Service(
             api_version = self.api_version,
             kind = self.kind,
-            metadata=self.client.V1ObjectMeta(
+            metadata=self.get_client().V1ObjectMeta(
                 labels=json.loads(self.labels),
                 annotations=json.loads(self.annotations)
             ),
-            spec=self.client.V1ServiceSpec(
+            spec=self.get_client().V1ServiceSpec(
                 selector = json.loads(self.selector),
-                ports = [self.client.V1ServicePort(
+                ports = [self.get_client().V1ServicePort(
                     port=self.port,
                     target_port=self.target_port
                 )]
@@ -237,20 +234,20 @@ class KubernetesIngress(KubernetesNetworkingBase):
     target_service = models.ForeignKey('KubernetesService', on_delete=models.CASCADE)
 
     def get_obj(self):
-        return self.client.NetworkingV1beta1Ingress(
+        return self.get_client().NetworkingV1beta1Ingress(
             api_version=self.api_version,
             kind=self.kind,
-            metadata=self.client.V1ObjectMeta(
+            metadata=self.get_client().V1ObjectMeta(
                 name=self.name,
                 annotations=self.annotations
             ),
-            spec=self.client.NetworkingV1beta1IngressSpec(
-                rules=[self.client.NetworkingV1beta1IngressRule(
+            spec=self.get_client().NetworkingV1beta1IngressSpec(
+                rules=[self.get_client().NetworkingV1beta1IngressRule(
                     host=self.hostname,
-                    http=self.client.NetworkingV1beta1HTTPIngressRuleValue(
-                        paths=[self.client.NetworkingV1beta1HTTPIngressPath(
+                    http=self.get_client().NetworkingV1beta1HTTPIngressRuleValue(
+                        paths=[self.get_client().NetworkingV1beta1HTTPIngressPath(
                             path=self.path,
-                            backend=self.client.NetworkingV1beta1IngressBackend(
+                            backend=self.get_client().NetworkingV1beta1IngressBackend(
                                 service_port=self.target_service.port,
                                 service_name=self.target_service.name
                             )
@@ -267,15 +264,15 @@ class KubernetesJob(KubernetesNetworkingBase):
     backoff_limit = models.IntegerField(default=3)
 
     def get_obj(self):
-        return self.client.V1Job(
+        return self.get_client().V1Job(
             api_version=self.api_version,
             kind=self.kind,
-            metadata=self.client.V1ObjectMeta(
+            metadata=self.get_client().V1ObjectMeta(
                 name = self.name,
                 labels = json.loads(self.labels),
                 annotations = json.loads(self.annotations)
             ),
-            spec=self.client.V1JobSpec(
+            spec=self.get_client().V1JobSpec(
                 template=self.pod_template.get_obj(),
                 backoff_limit=self.backoff_limits
             )
