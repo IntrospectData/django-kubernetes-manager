@@ -19,6 +19,44 @@ RESTART_POLICY = [
     ('Never', 'Never')
 ]
 
+class KubernetesTelemetryMixin(models.Model):
+
+    average_cpu_usage = models.DecimalField(null=True, max_digits=8, decimal_places=4)
+    average_mem_usage = models.IntegerField(null=True)
+    cpu_usage_seconds = models.DecimalField(null=True, max_digits=8, decimal_places=4)
+    mem_usage_seconds = models.IntegerField(null=True)
+
+    byte_units = {
+        "E": 1000**6, "P": 1000**5, "T": 1000**4,
+        "G": 1000**3, "M": 1000**2, "K": 1000,
+        "Ei": 1024**6, "Pi": 1024**5, "Ti": 1024**4,
+        "Gi": 1024**3, "Mi": 1024**2, "Ki": 1024
+    }
+
+    def splitNumeric(self, size):
+        return filter(None, re.split(r'(\d+)', size))
+
+    def parseSize(self, size):
+        number, unit = [string for string in splitNumeric(size)]
+        return int(float(number)*byte_units[unit])
+
+    def read_pod_metrics(self, api_instance=client.CustomObjectsApi(), pod_name="default-pod", pod_namespace="default"):
+        items = api_instance.list_cluster_custom_object('metrics.k8s.io', 'v1beta1', 'pods').get("items", [])
+        return [pod for pod in items if pod_name in pod.get("metadata", {}).get("name") and pod_namespace in pod.get("metadata", {}).get("namespace")]
+
+    def read_pod_usage(self, pod_name="default-pod", pod_namespace="default"):
+        pod_metrics = read_pod_metrics(pod_name=pod_name, pod_namespace=pod_namespace)
+        cpu = 0.000
+        memory = 0
+        for metric in pod_metrics:
+            for container in metric.get("containers", []):
+                ccpu = container.get("usage", {}).get("cpu", None)
+                cmem = container.get("usage", {}).get("memory", None)
+                if 'm' in ccpu:
+                    ccpu = int(ccpu.split("m")[0]) / 1000.000
+                cpu += ccpu
+                memory += parseSize(cmem)
+        return {'cpu': cpu, 'memory': memory}
 
 
 class KubernetesBase(models.Model):
@@ -27,6 +65,10 @@ class KubernetesBase(models.Model):
     description = models.CharField(max_length=128, null=True, blank=True)
     cluster = models.ForeignKey('TargetCluster', on_delete=models.SET_NULL, null=True)
     config = JSONField(default=dict, null=True, blank=True)
+    created = models.DateTimeField(null=True, blank=True)
+    modified = models.DateTimeField(null=True, blank=True)
+    deleted = models.DateTimeField(null=True, blank=True)
+
 
     class Meta:
         abstract = True
