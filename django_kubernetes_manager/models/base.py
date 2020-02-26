@@ -205,7 +205,7 @@ class KubernetesDeployment(KubernetesNetworkingBase):
                 annotations=self.annotations
             ),
             spec=client.V1DeploymentSpec(
-                selector=self.selector,
+                selector=client.V1LabelSelector(match_labels=self.selector),
                 replicas=self.replicas,
                 template=self.pod_template.get_obj()
             )
@@ -235,7 +235,7 @@ class KubernetesService(KubernetesNetworkingBase):
                 annotations=self.annotations
             ),
             spec=client.V1ServiceSpec(
-                selector = self.selector,
+                selector = client.V1LabelSelector(match_labels=self.selector),
                 ports = [client.V1ServicePort(
                     port=self.port,
                     target_port=self.target_port
@@ -268,7 +268,7 @@ class KubernetesIngress(KubernetesNetworkingBase):
                 annotations=self.annotations
             ),
             spec=client.NetworkingV1beta1IngressSpec(
-                selector = self.selector,
+                selector = client.V1LabelSelector(match_labels=self.selector),
                 rules=[client.NetworkingV1beta1IngressRule(
                     host=self.hostname,
                     http=client.NetworkingV1beta1HTTPIngressRuleValue(
