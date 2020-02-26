@@ -74,13 +74,14 @@ class KubernetesBase(models.Model):
         abstract = True
 
     def get_client(self, API=client.CoreV1Api, **kwargs):
-        """Gets a k8s api client based on the credential associated with this JobInstance
+        """Gets a k8s api client based on the credential associated with this instance
 
             Args:
                 API (client.<type>) - Kubernetes Client Type
             Returns:
                 object of type <API>
         """
+
         if "persist_config" not in kwargs:
             kwargs["persist_config"] = False
         with NamedTemporaryFile() as ntf:
@@ -91,14 +92,13 @@ class KubernetesBase(models.Model):
                 cc = self.cluster.config
             with open(ntf.name, "w") as f:
                 f.write(cc)
-            return API(api_client=config.new_client_from_config(**kwargs))
-
+            return API(api_client=config.new_client_from_config(context=self.cluster.config['contexts'][0]['name']))
 
 
 class KubernetesVolume(KubernetesBase):
 
     def get_obj(self):
-        return self.get_client().V1Volume(
+        return client.V1Volume(
             name=self.name,
             empty_dir={}
         )
@@ -110,7 +110,7 @@ class KubernetesVolumeMount(KubernetesBase):
     sub_path = models.CharField(max_length=255, default=None, null=True, blank=True)
 
     def get_obj(self):
-        return self.get_client().V1VolumeMount(
+        return client.V1VolumeMount(
             name=self.name,
             mount_path=self.mount_path,
             sub_path=slef.sub_path
@@ -128,14 +128,16 @@ class KubernetesContainer(KubernetesBase):
     volume_mount = models.ForeignKey('KubernetesVolumeMount', null=True, blank=True, on_delete=models.SET_NULL)
 
     def get_obj(self):
-        return self.get_client().V1Container(
+        return client.V1Container(
             name = self.name,
-            image = ':'.join(self.image_name, self.image_tag),
+            image = ':'.join([self.image_name, self.image_tag]),
             image_pull_policy = self.image_pull_policy,
-            ports = [self.get_client().V1ContainerPort(container_port=self.port)],
-            volume_mounts = [self.volume_mount.get_obj()],
+            ports = [client.V1ContainerPort(container_port=self.port)],
+            volume_mounts = [
+                self.volume_mount.get_obj()
+            ] if self.volume_mount is not None else None,
             command = [self.command],
-            args = [self.args.split(",")]
+            args = self.args.split(",")
         )
 
 
@@ -156,13 +158,16 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
     restart_policy = models.CharField(max_length=16, choices=RESTART_POLICY, default='Never')
 
     def get_obj(self):
-        return self.get_client().V1PodTemplateSpec(
-            metadata=self.get_client().V1ObjectMeta(
-                labels=json.loads(self.labels),
-                annotations=json.loads(self.annotations)
+        return client.V1PodTemplateSpec(
+            metadata=client.V1ObjectMeta(
+                name = self.name,
+                labels=self.labels,
+                annotations=self.annotations
             ),
-            spec=self.get_client().V1PodSpec(
-                volumes=[self.volume.get_obj()],
+            spec=client.V1PodSpec(
+                volumes=[
+                    self.volume.get_obj()
+                ] if self.volume is not None else None,
                 containers=[
                     self.primary_container.get_obj(),
                     self.secondary_container.get_obj()
@@ -184,25 +189,36 @@ class KubernetesNetworkingBase(KubernetesMetadataObjBase):
 
 
 
+
 class KubernetesDeployment(KubernetesNetworkingBase):
     selector = JSONField(default=dict)
     replicas = models.IntegerField(default=1)
     pod_template = models.ForeignKey('KubernetesPodTemplate', on_delete=models.CASCADE)
 
     def get_obj(self):
-        return self.get_client().V1Deployment(
+        return client.V1Deployment(
             api_version=self.api_version,
             kind=self.kind,
-            metadata=self.get_client().V1ObjectMeta(
-                labels=json.loads(self.labels),
-                annotations=json.loads(self.labels)
+            metadata=client.V1ObjectMeta(
+                name = self.name,
+                labels=self.labels,
+                annotations=self.annotations
             ),
-            spec=self.get_client().V1DeploymentSpec(
-                selector=json.loads(self.selector),
+            spec=client.V1DeploymentSpec(
+                selector=self.selector,
                 replicas=self.replicas,
                 template=self.pod_template.get_obj()
             )
         )
+
+    def deploy(self, namespace='default'):
+        api_instance = self.get_client(API=client.AppsV1Api)
+        body = self.get_obj()
+        api_response = api_instance.create_namespaced_deployment(
+            body = body,
+            namespace = namespace
+        )
+        return api_response.status
 
 
 
@@ -210,21 +226,31 @@ class KubernetesService(KubernetesNetworkingBase):
     selector = JSONField(default=dict)
     target_port = models.IntegerField(default=80)
     def get_obj(self):
-        return self.get_client().V1Service(
+        return client.V1Service(
             api_version = self.api_version,
             kind = self.kind,
-            metadata=self.get_client().V1ObjectMeta(
-                labels=json.loads(self.labels),
-                annotations=json.loads(self.annotations)
+            metadata=client.V1ObjectMeta(
+                name = self.name,
+                labels=self.labels,
+                annotations=self.annotations
             ),
-            spec=self.get_client().V1ServiceSpec(
-                selector = json.loads(self.selector),
-                ports = [self.get_client().V1ServicePort(
+            spec=client.V1ServiceSpec(
+                selector = self.selector,
+                ports = [client.V1ServicePort(
                     port=self.port,
                     target_port=self.target_port
                 )]
             )
         )
+
+    def deploy(self, namespace='default'):
+        api_instance = self.get_client(API=client.CoreV1Api)
+        body = self.get_obj()
+        api_response = api_instance.create_namespaced_service(
+            body = body,
+            namespace = namespace
+        )
+        return api_response.status
 
 
 
@@ -234,20 +260,21 @@ class KubernetesIngress(KubernetesNetworkingBase):
     target_service = models.ForeignKey('KubernetesService', on_delete=models.CASCADE)
 
     def get_obj(self):
-        return self.get_client().NetworkingV1beta1Ingress(
+        return client.NetworkingV1beta1Ingress(
             api_version=self.api_version,
             kind=self.kind,
-            metadata=self.get_client().V1ObjectMeta(
+            metadata=client.V1ObjectMeta(
                 name=self.name,
                 annotations=self.annotations
             ),
-            spec=self.get_client().NetworkingV1beta1IngressSpec(
-                rules=[self.get_client().NetworkingV1beta1IngressRule(
+            spec=client.NetworkingV1beta1IngressSpec(
+                selector = self.selector,
+                rules=[client.NetworkingV1beta1IngressRule(
                     host=self.hostname,
-                    http=self.get_client().NetworkingV1beta1HTTPIngressRuleValue(
-                        paths=[self.get_client().NetworkingV1beta1HTTPIngressPath(
+                    http=client.NetworkingV1beta1HTTPIngressRuleValue(
+                        paths=[client.NetworkingV1beta1HTTPIngressPath(
                             path=self.path,
-                            backend=self.get_client().NetworkingV1beta1IngressBackend(
+                            backend=client.NetworkingV1beta1IngressBackend(
                                 service_port=self.target_service.port,
                                 service_name=self.target_service.name
                             )
@@ -257,6 +284,15 @@ class KubernetesIngress(KubernetesNetworkingBase):
             )
         )
 
+    def deploy(self, namespace='default'):
+        api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
+        body = self.get_obj()
+        api_response = api_instance.create_namespaced_ingress(
+            body = body,
+            namespace = namespace
+        )
+        return api_response.status
+
 
 
 class KubernetesJob(KubernetesNetworkingBase):
@@ -264,16 +300,25 @@ class KubernetesJob(KubernetesNetworkingBase):
     backoff_limit = models.IntegerField(default=3)
 
     def get_obj(self):
-        return self.get_client().V1Job(
+        return client.V1Job(
             api_version=self.api_version,
             kind=self.kind,
-            metadata=self.get_client().V1ObjectMeta(
+            metadata=client.V1ObjectMeta(
                 name = self.name,
-                labels = json.loads(self.labels),
-                annotations = json.loads(self.annotations)
+                labels = self.labels,
+                annotations = self.annotations
             ),
-            spec=self.get_client().V1JobSpec(
+            spec=client.V1JobSpec(
                 template=self.pod_template.get_obj(),
                 backoff_limit=self.backoff_limits
             )
         )
+
+    def deploy(self, namespace='default'):
+        api_instance = self.get_client(API=client.BatchV1Api)
+        body = self.get_obj()
+        api_response = api_instance.create_namespaced_job(
+            body = body,
+            namespace = namespace
+        )
+        return api_response.status
