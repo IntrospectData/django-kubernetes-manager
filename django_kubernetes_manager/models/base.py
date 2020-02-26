@@ -20,11 +20,14 @@ RESTART_POLICY = [
 ]
 
 class KubernetesTelemetryMixin(models.Model):
+    object_status = models.CharField(max_length=128, null=True, blank=True)
+    average_cpu_usage = models.DecimalField(null=True, blank=True, max_digits=8, decimal_places=4)
+    average_mem_usage = models.IntegerField(null=True, blank=True)
+    cpu_usage_seconds = models.DecimalField(null=True, blank=True, max_digits=8, decimal_places=4)
+    mem_usage_seconds = models.IntegerField(null=True, blank=True)
 
-    average_cpu_usage = models.DecimalField(null=True, max_digits=8, decimal_places=4)
-    average_mem_usage = models.IntegerField(null=True)
-    cpu_usage_seconds = models.DecimalField(null=True, max_digits=8, decimal_places=4)
-    mem_usage_seconds = models.IntegerField(null=True)
+    class Meta:
+        abstract = True
 
     byte_units = {
         "E": 1000**6, "P": 1000**5, "T": 1000**4,
@@ -65,8 +68,7 @@ class KubernetesBase(models.Model):
     description = models.CharField(max_length=128, null=True, blank=True)
     cluster = models.ForeignKey('TargetCluster', on_delete=models.SET_NULL, null=True)
     config = JSONField(default=dict, null=True, blank=True)
-    created = models.DateTimeField(null=True, blank=True)
-    modified = models.DateTimeField(null=True, blank=True)
+    deployed = models.DateTimeField(null=True, blank=True)
     deleted = models.DateTimeField(null=True, blank=True)
 
 
@@ -178,19 +180,17 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
 
 
 
-
 class KubernetesNetworkingBase(KubernetesMetadataObjBase):
     api_version = models.CharField(max_length=16, default="v1")
     kind = models.CharField(max_length=16, default="Service")
     port = models.IntegerField(default=80)
-
+    kuid = models.CharField(max_length=48, null=True, blank=True)
     class Meta:
         abstract= True
 
 
 
-
-class KubernetesDeployment(KubernetesNetworkingBase):
+class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
     selector = JSONField(default=dict)
     replicas = models.IntegerField(default=1)
     pod_template = models.ForeignKey('KubernetesPodTemplate', on_delete=models.CASCADE)
@@ -218,13 +218,48 @@ class KubernetesDeployment(KubernetesNetworkingBase):
             body = body,
             namespace = namespace
         )
-        return api_response.status
+        self.kuid = api_response.metadata.uid
+        self.save()
+        return api_response
+
+
+
+class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
+    pod_template = models.ForeignKey('KubernetesPodTemplate', on_delete=models.CASCADE)
+    backoff_limit = models.IntegerField(default=3)
+
+    def get_obj(self):
+        return client.V1Job(
+            api_version=self.api_version,
+            kind=self.kind,
+            metadata=client.V1ObjectMeta(
+                name = self.name,
+                labels = self.labels,
+                annotations = self.annotations
+            ),
+            spec=client.V1JobSpec(
+                template=self.pod_template.get_obj(),
+                backoff_limit=self.backoff_limits
+            )
+        )
+
+    def deploy(self, namespace='default'):
+        api_instance = self.get_client(API=client.BatchV1Api)
+        body = self.get_obj()
+        api_response = api_instance.create_namespaced_job(
+            body = body,
+            namespace = namespace
+        )
+        self.kuid = api_response.metadata.uid
+        self.save()
+        return api_response
 
 
 
 class KubernetesService(KubernetesNetworkingBase):
     selector = JSONField(default=dict)
     target_port = models.IntegerField(default=80)
+
     def get_obj(self):
         return client.V1Service(
             api_version = self.api_version,
@@ -250,7 +285,9 @@ class KubernetesService(KubernetesNetworkingBase):
             body = body,
             namespace = namespace
         )
-        return api_response.status
+        self.kuid = api_response.metadata.uid
+        self.save()
+        return api_response
 
 
 
@@ -291,34 +328,6 @@ class KubernetesIngress(KubernetesNetworkingBase):
             body = body,
             namespace = namespace
         )
-        return api_response.status
-
-
-
-class KubernetesJob(KubernetesNetworkingBase):
-    pod_template = models.ForeignKey('KubernetesPodTemplate', on_delete=models.CASCADE)
-    backoff_limit = models.IntegerField(default=3)
-
-    def get_obj(self):
-        return client.V1Job(
-            api_version=self.api_version,
-            kind=self.kind,
-            metadata=client.V1ObjectMeta(
-                name = self.name,
-                labels = self.labels,
-                annotations = self.annotations
-            ),
-            spec=client.V1JobSpec(
-                template=self.pod_template.get_obj(),
-                backoff_limit=self.backoff_limits
-            )
-        )
-
-    def deploy(self, namespace='default'):
-        api_instance = self.get_client(API=client.BatchV1Api)
-        body = self.get_obj()
-        api_response = api_instance.create_namespaced_job(
-            body = body,
-            namespace = namespace
-        )
-        return api_response.status
+        self.kuid = api_response.metadata.uid
+        self.save()
+        return api_response
