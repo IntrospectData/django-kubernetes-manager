@@ -1,11 +1,12 @@
 import json
+import re
+from tempfile import NamedTemporaryFile
+from uuid import uuid4
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 
-from uuid import uuid4
 from kubernetes import client, config
-from tempfile import NamedTemporaryFile
 
 PULL_POLICY = [
     ('Always', 'Always'),
@@ -19,6 +20,13 @@ RESTART_POLICY = [
     ('Never', 'Never')
 ]
 
+byte_units = {
+    "E": 1000**6, "P": 1000**5, "T": 1000**4,
+    "G": 1000**3, "M": 1000**2, "K": 1000,
+    "Ei": 1024**6, "Pi": 1024**5, "Ti": 1024**4,
+    "Gi": 1024**3, "Mi": 1024**2, "Ki": 1024
+}
+
 class KubernetesTelemetryMixin(models.Model):
     object_status = models.CharField(max_length=128, null=True, blank=True)
     average_cpu_usage = models.DecimalField(null=True, blank=True, max_digits=8, decimal_places=4)
@@ -29,26 +37,24 @@ class KubernetesTelemetryMixin(models.Model):
     class Meta:
         abstract = True
 
-    byte_units = {
-        "E": 1000**6, "P": 1000**5, "T": 1000**4,
-        "G": 1000**3, "M": 1000**2, "K": 1000,
-        "Ei": 1024**6, "Pi": 1024**5, "Ti": 1024**4,
-        "Gi": 1024**3, "Mi": 1024**2, "Ki": 1024
-    }
-
     def splitNumeric(self, size):
         return filter(None, re.split(r'(\d+)', size))
 
     def parseSize(self, size):
-        number, unit = [string for string in splitNumeric(size)]
+        number, unit = [string for string in self.splitNumeric(size)]
         return int(float(number)*byte_units[unit])
 
-    def read_pod_metrics(self, api_instance=client.CustomObjectsApi(), pod_name="default-pod", pod_namespace="default"):
+    def read_pod_metrics(self):
+        api_instance = self.get_client(API=client.CustomObjectsApi)
+        pod_name = self.name
+        pod_namespace = self.namespace
         items = api_instance.list_cluster_custom_object('metrics.k8s.io', 'v1beta1', 'pods').get("items", [])
         return [pod for pod in items if pod_name in pod.get("metadata", {}).get("name") and pod_namespace in pod.get("metadata", {}).get("namespace")]
 
-    def read_pod_usage(self, pod_name="default-pod", pod_namespace="default"):
-        pod_metrics = read_pod_metrics(pod_name=pod_name, pod_namespace=pod_namespace)
+    def read_pod_usage(self):
+        pod_name = self.pod_template.name
+        pod_namespace = self.namespace
+        pod_metrics = self.read_pod_metrics()
         cpu = 0.000
         memory = 0
         for metric in pod_metrics:
@@ -57,8 +63,10 @@ class KubernetesTelemetryMixin(models.Model):
                 cmem = container.get("usage", {}).get("memory", None)
                 if 'm' in ccpu:
                     ccpu = int(ccpu.split("m")[0]) / 1000.000
+                else:
+                    ccpu = int(ccpu)
                 cpu += ccpu
-                memory += parseSize(cmem)
+                memory += self.parseSize(cmem)
         return {'cpu': cpu, 'memory': memory}
 
 
@@ -184,7 +192,9 @@ class KubernetesNetworkingBase(KubernetesMetadataObjBase):
     api_version = models.CharField(max_length=16, default="v1")
     kind = models.CharField(max_length=16, default="Service")
     port = models.IntegerField(default=80)
-    kuid = models.CharField(max_length=48, null=True, blank=True)
+    namespace = models.CharField(max_length=64, default="default")
+    kuid = models.CharField(max_length=48, null=True, blank=True, help_text="Object's UID in the cluster")
+
     class Meta:
         abstract= True
 
@@ -211,12 +221,12 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
             )
         )
 
-    def deploy(self, namespace='default'):
+    def deploy(self):
         api_instance = self.get_client(API=client.AppsV1Api)
         body = self.get_obj()
         api_response = api_instance.create_namespaced_deployment(
             body = body,
-            namespace = namespace
+            namespace = self.namespace
         )
         self.kuid = api_response.metadata.uid
         self.save()
@@ -243,12 +253,12 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
             )
         )
 
-    def deploy(self, namespace='default'):
+    def deploy(self):
         api_instance = self.get_client(API=client.BatchV1Api)
         body = self.get_obj()
         api_response = api_instance.create_namespaced_job(
             body = body,
-            namespace = namespace
+            namespace = self.namespace
         )
         self.kuid = api_response.metadata.uid
         self.save()
@@ -278,12 +288,12 @@ class KubernetesService(KubernetesNetworkingBase):
             )
         )
 
-    def deploy(self, namespace='default'):
+    def deploy(self):
         api_instance = self.get_client(API=client.CoreV1Api)
         body = self.get_obj()
         api_response = api_instance.create_namespaced_service(
             body = body,
-            namespace = namespace
+            namespace = self.namespace
         )
         self.kuid = api_response.metadata.uid
         self.save()
@@ -321,12 +331,12 @@ class KubernetesIngress(KubernetesNetworkingBase):
             )
         )
 
-    def deploy(self, namespace='default'):
+    def deploy(self):
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
         body = self.get_obj()
         api_response = api_instance.create_namespaced_ingress(
             body = body,
-            namespace = namespace
+            namespace = self.namespace
         )
         self.kuid = api_response.metadata.uid
         self.save()
