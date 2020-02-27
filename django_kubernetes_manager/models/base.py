@@ -27,6 +27,8 @@ byte_units = {
     "Gi": 1024**3, "Mi": 1024**2, "Ki": 1024
 }
 
+
+
 class KubernetesTelemetryMixin(models.Model):
     object_status = models.CharField(max_length=128, null=True, blank=True)
     average_cpu_usage = models.DecimalField(null=True, blank=True, max_digits=8, decimal_places=4)
@@ -70,6 +72,7 @@ class KubernetesTelemetryMixin(models.Model):
         return {'cpu': cpu, 'memory': memory}
 
 
+
 class KubernetesBase(models.Model):
     id = models.UUIDField(default=uuid4, editable=False, primary_key=True)
     name = models.CharField(max_length=128, default="kubernetes-object")
@@ -103,6 +106,7 @@ class KubernetesBase(models.Model):
             with open(ntf.name, "w") as f:
                 f.write(cc)
             return API(api_client=config.new_client_from_config(context=self.cluster.config['contexts'][0]['name']))
+
 
 
 class KubernetesVolume(KubernetesBase):
