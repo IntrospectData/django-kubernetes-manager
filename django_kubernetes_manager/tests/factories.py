@@ -1,11 +1,15 @@
+import os
+
 import factory
-import factory.django.DjangoModelFactory as DMF
 import factory.fuzzy
+from factory.django import DjangoModelFactory as DMF
 from faker import Faker
 
 fake = Faker()
 
-models_path = 'django_kubernetes_manager.models.'
+models_path = 'django_kubernetes_manager.'
+
+microk8s_config = os.getenv('MICROK8S_CF', None)
 
 
 
@@ -13,7 +17,12 @@ class TargetClusterFactory(DMF):
     class Meta:
         model = models_path + 'TargetCluster'
 
-    pass
+    title = factory.fuzzy.FuzzyText(length=8, suffix="-cluster")
+    description = fake.sentence()
+    api_endpoint = 'https://127.0.0.1:16443'
+    telemetry_endpoint = 'https://127.0.0.1:16443'
+    telemetry_source = 'p'
+    config = microk8s_config
 
 
 
@@ -22,15 +31,15 @@ class KubernetesContainerFactory(DMF):
         model = models_path + 'KubernetesContainer'
 
     name = factory.fuzzy.FuzzyText(length=8, suffix="-container")
-    description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
+    description = fake.sentence()
     cluster = factory.SubFactory(TargetClusterFactory)
-    config = fake.pydict(nb_elements=4, variable_nb_elements=True)
+    config = fake.pydict()
     deployed = None
     deleted = None
     image_name = factory.fuzzy.FuzzyChoice(["debian", "alpine", "busybox"])
     image_tag = "latest"
     image_pull_policy = "IfNotPresent"
-    command = "/bin/bash"
+    command = "/bin/sh"
     args = "-c,sleep 6000"
     port = factory.fuzzy.FuzzyChoice([80, 8080, 8000])
     volume_mount = None
