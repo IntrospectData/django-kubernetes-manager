@@ -33,7 +33,7 @@ class KubernetesContainerFactory(DMF):
     name = factory.fuzzy.FuzzyText(length=8, suffix="-container")
     description = fake.sentence()
     cluster = factory.SubFactory(TargetClusterFactory)
-    config = fake.pydict()
+    config = {"data_is_fake": "true"}
     deployed = None
     deleted = None
     image_name = factory.fuzzy.FuzzyChoice(["debian", "alpine", "busybox"])
@@ -53,7 +53,7 @@ class KubernetesPodTemplateFactory(DMF):
     name = factory.fuzzy.FuzzyText(length=8, suffix="-container")
     description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
-    config = fake.pydict(nb_elements=4, variable_nb_elements=True)
+    config = {"data_is_fake": "true"}
     deployed = None
     deleted = None
     labels = {"app": fake.word()}
@@ -72,7 +72,7 @@ class KubernetesDeploymentFactory(DMF):
     name = factory.fuzzy.FuzzyText(length=8, suffix="-container")
     description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
-    config = fake.pydict(nb_elements=4, variable_nb_elements=True)
+    config = {"data_is_fake": "true"}
     deployed = None
     deleted = None
     labels = {"app": fake.word()}
@@ -95,7 +95,7 @@ class KubernetesJobFactory(DMF):
     name = factory.fuzzy.FuzzyText(length=8, suffix="-container")
     description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
-    config = fake.pydict(nb_elements=4, variable_nb_elements=True)
+    config = {"data_is_fake": "true"}
     deployed = None
     deleted = None
     labels = {"app": fake.word()}

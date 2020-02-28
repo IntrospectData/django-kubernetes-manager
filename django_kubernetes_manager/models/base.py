@@ -76,7 +76,7 @@ class KubernetesTelemetryMixin(models.Model):
 class KubernetesBase(models.Model):
     id = models.UUIDField(default=uuid4, editable=False, primary_key=True)
     name = models.CharField(max_length=128, default="kubernetes-object")
-    description = models.CharField(max_length=128, null=True, blank=True)
+    description = models.CharField(max_length=1024, null=True, blank=True)
     cluster = models.ForeignKey('TargetCluster', on_delete=models.SET_NULL, null=True)
     config = JSONField(default=dict, null=True, blank=True)
     deployed = models.DateTimeField(null=True, blank=True)
@@ -253,7 +253,8 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
             ),
             spec=client.V1JobSpec(
                 template=self.pod_template.get_obj(),
-                backoff_limit=self.backoff_limits
+                backoff_limit=self.backoff_limit,
+                ttl_seconds_after_finished = 10
             )
         )
 
