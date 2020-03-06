@@ -1,4 +1,4 @@
-from models import (KubernetesBase, KubernetesContainer, KubernetesDeployment,
+from .models import (KubernetesBase, KubernetesContainer, KubernetesDeployment,
                     KubernetesIngress, KubernetesJob,
                     KubernetesMetadataObjBase, KubernetesNetworkingBase,
                     KubernetesPodTemplate, KubernetesService)
@@ -16,10 +16,9 @@ class KubernetesBaseSerializer(serializers.HyperlinkedModelSerializer):
 class KubernetesContainerSerializer(KubernetesBaseSerializer):
     class Meta:
         model = KubernetesContainer
-        fields = [
-            field for field in KubernetesBaseSerializer.Meta.fields,
+        fields = KubernetesBaseSerializer.Meta.fields + [
             'image_name', 'image_tag', 'image_pull_policy',
-            'command', 'args', 'port', 'volume'
+            'command', 'args', 'port', 'volume_mount'
         ]
 
 
@@ -27,8 +26,7 @@ class KubernetesContainerSerializer(KubernetesBaseSerializer):
 class KubernetesMetadataObjBaseSerializer(KubernetesBaseSerializer):
     class Meta:
         model = KubernetesMetadataObjBase
-        fields = [
-            field for field in KubernetesBaseSerializer.Meta.fields,
+        fields = KubernetesBaseSerializer.Meta.fields + [
             'labels', 'annotations'
         ]
         abstract = True
@@ -38,8 +36,7 @@ class KubernetesMetadataObjBaseSerializer(KubernetesBaseSerializer):
 class KubernetesPodTemplateSerializer(KubernetesMetadataObjBaseSerializer):
     class Meta:
         model = KubernetesPodTemplate
-        fields = [
-            field for field in KubernetesMetadataObjBaseSerializer.Meta.fields,
+        fields = KubernetesMetadataObjBaseSerializer.Meta.fields + [
             'volume', 'primary_container', 'secondary_container',
             'restart_policy'
         ]
@@ -49,8 +46,7 @@ class KubernetesPodTemplateSerializer(KubernetesMetadataObjBaseSerializer):
 class KubernetesNetworkingBaseSerializer(KubernetesMetadataObjBaseSerializer):
     class Meta:
         model = KubernetesNetworkingBase
-        fields = [
-            field for field in KubernetesMetadataObjBaseSerializer.Meta.fields,
+        fields = KubernetesMetadataObjBaseSerializer.Meta.fields + [
             'api_version', 'kind', 'port', 'namespace', 'kuid'
         ]
         abstract = True
@@ -60,8 +56,7 @@ class KubernetesNetworkingBaseSerializer(KubernetesMetadataObjBaseSerializer):
 class KubernetesDeploymentSerializer(KubernetesNetworkingBaseSerializer):
     class Meta:
         model = KubernetesDeployment
-        fields = [
-            field for field in KubernetesNetworkingBaseSerializer.Meta.fields,
+        fields = KubernetesNetworkingBaseSerializer.Meta.fields + [
             'selector', 'replicas', 'pod_template'
         ]
 
@@ -70,8 +65,7 @@ class KubernetesDeploymentSerializer(KubernetesNetworkingBaseSerializer):
 class KubernetesJobSerializer(KubernetesNetworkingBaseSerializer):
     class Meta:
         model = KubernetesJob
-        fields = [
-            field for field in KubernetesNetworkingBaseSerializer.Meta.fields,
+        fields = KubernetesNetworkingBaseSerializer.Meta.fields + [
             'backoff_limit', 'pod_template'
         ]
 
@@ -80,8 +74,7 @@ class KubernetesJobSerializer(KubernetesNetworkingBaseSerializer):
 class KubernetesServiceSerializer(KubernetesNetworkingBaseSerializer):
     class Meta:
         model = KubernetesService
-        fields = [
-            field for field in KubernetesNetworkingBaseSerializer.Meta.fields,
+        fields = KubernetesNetworkingBaseSerializer.Meta.fields + [
             'selector', 'target_port'
         ]
 
@@ -90,7 +83,6 @@ class KubernetesServiceSerializer(KubernetesNetworkingBaseSerializer):
 class KubernetesIngressSerializer(KubernetesNetworkingBaseSerializer):
     class Meta:
         model = KubernetesIngress
-        fields = [
-            field for field in KubernetesNetworkingBaseSerializer.Meta.fields,
+        fields = KubernetesNetworkingBaseSerializer.Meta.fields + [
             'hostname', 'path', 'target_service'
         ]

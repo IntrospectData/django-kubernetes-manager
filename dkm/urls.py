@@ -14,8 +14,20 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django_kubernetes_manager import views
+from rest_framework import routers
+
+router = routers.DefaultRouter()
+router.register(r'containers', views.KubernetesContainerViewSet)
+router.register(r'pods', views.KubernetesPodTemplateViewSet)
+router.register(r'deployments', views.KubernetesDeploymentViewSet)
+router.register(r'services', views.KubernetesServiceViewSet)
+router.register(r'ingresses', views.KubernetesIngressViewSet)
+router.register(r'jobs', views.KubernetesJobViewSet)
 
 urlpatterns = [
+    path('', include(router.urls)),
+    path('api-auth/', include('rest_framework.urls', namespace='rest')),
     path('admin/', admin.site.urls),
 ]
