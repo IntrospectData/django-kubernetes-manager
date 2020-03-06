@@ -12,6 +12,8 @@ kubernetes ="*"
 django ="*"
 psycopg2 ="*"
 django_extensions ='*'
+drf-yasg = "*"
+djangorestframework = "*"
 
 [requires]
 python_version = "3.7"
