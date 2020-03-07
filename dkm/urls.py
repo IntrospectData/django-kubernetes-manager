@@ -30,7 +30,7 @@ schema_view = get_schema_view(
       terms_of_service="https://introspectdata.com/terms-service/",
       contact=openapi.Contact(email="bradley@introspectdata.com"),
       license=openapi.License(
-        name="MIT License", 
+        name="MIT License",
         url="https://github.com/IntrospectData/Django-Kubernetes-Manager/blob/master/LICENSE"
       ),
    ),
@@ -47,10 +47,10 @@ router.register(r'ingresses', views.KubernetesIngressViewSet)
 router.register(r'jobs', views.KubernetesJobViewSet)
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path('api-auth/', include('rest_framework.urls', namespace='rest')),
     path('admin/', admin.site.urls),
-    url(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('api/', include(router.urls)),
+    path('api/auth/', include('rest_framework.urls', namespace='rest')),
+    url(r'^api/swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('api/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]
