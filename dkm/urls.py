@@ -29,7 +29,10 @@ schema_view = get_schema_view(
       description="Django Kubernetes Manager",
       terms_of_service="https://introspectdata.com/terms-service/",
       contact=openapi.Contact(email="bradley@introspectdata.com"),
-      license=openapi.License(name="MIT License"),
+      license=openapi.License(
+        name="MIT License", 
+        url="https://github.com/IntrospectData/Django-Kubernetes-Manager/blob/master/LICENSE"
+      ),
    ),
    public=True,
    permission_classes=(permissions.IsAuthenticated,),
