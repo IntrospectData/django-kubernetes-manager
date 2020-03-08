@@ -1,8 +1,16 @@
 from .models import (KubernetesBase, KubernetesContainer, KubernetesDeployment,
                     KubernetesIngress, KubernetesJob,
                     KubernetesMetadataObjBase, KubernetesNetworkingBase,
-                    KubernetesPodTemplate, KubernetesService)
+                    KubernetesPodTemplate, KubernetesService, TargetCluster)
 from rest_framework import serializers
+
+
+
+class TargetClusterSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = TargetCluster
+        fields = ['title', 'api_endpoint', 'telemetry_endpoint', 'config']
+
 
 
 class KubernetesBaseSerializer(serializers.HyperlinkedModelSerializer):

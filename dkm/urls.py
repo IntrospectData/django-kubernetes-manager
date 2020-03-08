@@ -45,6 +45,7 @@ router.register(r'deployments', views.KubernetesDeploymentViewSet)
 router.register(r'services', views.KubernetesServiceViewSet)
 router.register(r'ingresses', views.KubernetesIngressViewSet)
 router.register(r'jobs', views.KubernetesJobViewSet)
+router.register(r'clusters', views.TargetClusterViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
