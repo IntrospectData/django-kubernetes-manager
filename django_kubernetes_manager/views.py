@@ -84,4 +84,4 @@ class KubernetesJobViewSet(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=True)
     def deploy(self, request, *args, **kwargs):
-        KubernetesJob.objects.get(pk=self.pk).deploy()
+        KubernetesJob.objects.get(pk=kwargs['pk']).deploy()
