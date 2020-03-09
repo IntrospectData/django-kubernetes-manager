@@ -52,6 +52,10 @@ class KubernetesDeploymentViewSet(viewsets.ModelViewSet):
     def deploy(self, request, *args, **kwargs):
         return KubernetesDeployment.objects.get(pk=kwargs['pk']).deploy()
 
+    @action(methods=['post'], detail=True)
+    def delete(self, request, *args, **kwargs):
+        return KubernetesDeployment.objects.get(pk=kwargs['pk']).k_delete()
+
 
 
 class KubernetesServiceViewSet(viewsets.ModelViewSet):
@@ -62,6 +66,14 @@ class KubernetesServiceViewSet(viewsets.ModelViewSet):
     serializer_class = KubernetesServiceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    @action(methods=['post', 'get'], detail=True)
+    def deploy(self, request, *args, **kwargs):
+        return KubernetesService.objects.get(pk=kwargs['pk']).deploy()
+
+    @action(methods=['post'], detail=True)
+    def delete(self, request, *args, **kwargs):
+        return KubernetesService.objects.get(pk=kwargs['pk']).k_delete()
+
 
 
 class KubernetesIngressViewSet(viewsets.ModelViewSet):
@@ -71,6 +83,14 @@ class KubernetesIngressViewSet(viewsets.ModelViewSet):
     queryset = KubernetesIngress.objects.all()
     serializer_class = KubernetesIngressSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    @action(methods=['post', 'get'], detail=True)
+    def deploy(self, request, *args, **kwargs):
+        return KubernetesIngress.objects.get(pk=kwargs['pk']).deploy()
+
+    @action(methods=['post'], detail=True)
+    def delete(self, request, *args, **kwargs):
+        return KubernetesIngress.objects.get(pk=kwargs['pk']).k_delete()
 
 
 
@@ -84,4 +104,8 @@ class KubernetesJobViewSet(viewsets.ModelViewSet):
 
     @action(methods=['post'], detail=True)
     def deploy(self, request, *args, **kwargs):
-        KubernetesJob.objects.get(pk=kwargs['pk']).deploy()
+        return KubernetesJob.objects.get(pk=kwargs['pk']).deploy()
+
+    @action(methods=['post'], detail=True)
+    def delete(self, request, *args, **kwargs):
+        return KubernetesJob.objects.get(pk=kwargs['pk']).k_delete()
