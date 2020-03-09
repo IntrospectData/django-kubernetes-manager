@@ -57,7 +57,7 @@ class KubernetesDeploymentViewSet(viewsets.ModelViewSet):
         return KubernetesDeployment.objects.get(pk=kwargs['pk']).k_delete()
 
     @action(methods=['post'], detail=True)
-    def pod_usage(self.request, *args, **kwargs):
+    def pod_usage(self, request, *args, **kwargs):
         return KubernetesDeployment.objects.get(pk=kwargs['pk']).read_pod_usage()
 
 
@@ -114,5 +114,5 @@ class KubernetesJobViewSet(viewsets.ModelViewSet):
         return KubernetesJob.objects.get(pk=kwargs['pk']).k_delete()
 
     @action(methods=['post'], detail=True)
-    def pod_usage(self.request, *args, **kwargs):
+    def pod_usage(self, request, *args, **kwargs):
         return KubernetesJob.objects.get(pk=kwargs['pk']).read_pod_usage()
