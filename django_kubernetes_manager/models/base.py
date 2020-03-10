@@ -111,6 +111,65 @@ class KubernetesBase(TitleSlugDescriptionModel):
 
 
 
+class KubernetesMetadataObjBase(KubernetesBase):
+    labels = JSONField(default=dict)
+    annotations = JSONField(default=dict, null=True, blank=True)
+
+    class Meta:
+        abstract = True
+
+
+
+class KubernetesNetworkingBase(KubernetesMetadataObjBase):
+    api_version = models.CharField(max_length=16, default="v1")
+    kind = models.CharField(max_length=16)
+    port = models.IntegerField(default=80)
+    namespace = models.CharField(max_length=64, default="default")
+    kuid = models.CharField(max_length=48, null=True, blank=True, help_text="Object's UID in the cluster")
+
+    class Meta:
+        abstract= True
+
+
+
+class KubernetesNamespace(KubernetesMetadataObjBase):
+    api_version = models.CharField(max_length=16, default="v1")
+    kind = models.CharField(max_length=16)
+    exists = models.BooleanField(default=False)
+
+    def get_obj(self):
+         return client.V1Namespace(
+            api_version = self.api_version,
+            kind = self.kind,
+            metadata=client.V1ObjectMeta(
+                name = self.slug,
+                labels=self.labels,
+                annotations=self.annotations
+            ),
+            spec = client.V1NamespaceSpec()
+         )
+
+    def deploy(self):
+        api_instance = self.get_client(API=client.CoreV1Api)
+        body = self.get_obj()
+        api_response = api_instance.create_namespace(
+            body = body,
+        )
+        self.exists = True
+        self.save()
+        return str(api_response.status)
+
+    def k_delete(self):
+        api_instance = self.get_client(API=client.CoreV1Api)
+        api_response = api_instance.delete_namespace(
+            name = self.slug,
+        )
+        self.exists = False
+        self.save()
+        return str(api_response.status)
+
+
+
 class KubernetesVolume(KubernetesBase):
 
     def get_obj(self):
@@ -158,15 +217,6 @@ class KubernetesContainer(KubernetesBase):
 
 
 
-class KubernetesMetadataObjBase(KubernetesBase):
-    labels = JSONField(default=dict)
-    annotations = JSONField(default=dict, null=True, blank=True)
-
-    class Meta:
-        abstract = True
-
-
-
 class KubernetesPodTemplate(KubernetesMetadataObjBase):
     volume = models.ForeignKey('KubernetesVolume', null=True, blank=True, on_delete=models.SET_NULL)
     primary_container = models.ForeignKey('KubernetesContainer', on_delete=models.CASCADE, related_name='primary_container')
@@ -191,18 +241,6 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
                 restart_policy = self.restart_policy
             )
         )
-
-
-
-class KubernetesNetworkingBase(KubernetesMetadataObjBase):
-    api_version = models.CharField(max_length=16, default="v1")
-    kind = models.CharField(max_length=16, default="Service")
-    port = models.IntegerField(default=80)
-    namespace = models.CharField(max_length=64, default="default")
-    kuid = models.CharField(max_length=48, null=True, blank=True, help_text="Object's UID in the cluster")
-
-    class Meta:
-        abstract= True
 
 
 
@@ -335,6 +373,7 @@ class KubernetesService(KubernetesNetworkingBase):
         self.kuid = None
         self.save()
         return str(api_response.status)
+
 
 
 class KubernetesIngress(KubernetesNetworkingBase):

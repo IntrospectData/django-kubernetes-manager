@@ -3,12 +3,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import (KubernetesContainer, KubernetesDeployment,
                      KubernetesIngress, KubernetesJob, KubernetesPodTemplate,
-                     KubernetesService, TargetCluster)
+                     KubernetesService, TargetCluster, KubernetesNamespace)
 from .serializers import (KubernetesContainerSerializer,
                           KubernetesDeploymentSerializer,
                           KubernetesIngressSerializer, KubernetesJobSerializer,
                           KubernetesPodTemplateSerializer,
-                          KubernetesServiceSerializer, TargetClusterSerializer)
+                          KubernetesServiceSerializer, TargetClusterSerializer,
+                          KubernetesNamespaceSerializer)
 
 
 
@@ -19,6 +20,32 @@ class TargetClusterViewSet(viewsets.ModelViewSet):
     queryset = TargetCluster.objects.all()
     serializer_class = TargetClusterSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+
+class KubernetesNamespaceViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows namespaces to be created or deleted
+    """
+    queryset = KubernetesNamespace.objects.all()
+    serializer_class = KubernetesNamespaceSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(methods=['post', 'get'], detail=True)
+    def deploy(self, request, *args, **kwargs):
+        """
+        Action to deploy the namespace resource to target cluster.
+        """
+        return Response(KubernetesNamespace.objects.get(pk=kwargs['pk']).deploy())
+
+    @action(methods=['post', 'get'], detail=True)
+    def k_delete(self, request, *args, **kwargs):
+        """
+        Action to delete the kubernetes namespace from the cluster.
+        """
+        return Response(KubernetesNamespace.objects.get(pk=kwargs['pk']).k_delete())
+
+
 
 class KubernetesContainerViewSet(viewsets.ModelViewSet):
     """
@@ -68,6 +95,7 @@ class KubernetesDeploymentViewSet(viewsets.ModelViewSet):
         Action to fetch point-in-time cpu and memory usage of pod.
         """
         return Response(KubernetesDeployment.objects.get(pk=kwargs['pk']).read_pod_usage())
+
 
 
 class KubernetesServiceViewSet(viewsets.ModelViewSet):

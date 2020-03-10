@@ -1,7 +1,8 @@
 from .models import (KubernetesBase, KubernetesContainer, KubernetesDeployment,
                     KubernetesIngress, KubernetesJob,
                     KubernetesMetadataObjBase, KubernetesNetworkingBase,
-                    KubernetesPodTemplate, KubernetesService, TargetCluster)
+                    KubernetesPodTemplate, KubernetesService, TargetCluster,
+                    KubernetesNamespace)
 from rest_framework import serializers
 
 
@@ -21,16 +22,6 @@ class KubernetesBaseSerializer(serializers.HyperlinkedModelSerializer):
 
 
 
-class KubernetesContainerSerializer(KubernetesBaseSerializer):
-    class Meta:
-        model = KubernetesContainer
-        fields = KubernetesBaseSerializer.Meta.fields + [
-            'image_name', 'image_tag', 'image_pull_policy',
-            'command', 'args', 'port', 'volume_mount'
-        ]
-
-
-
 class KubernetesMetadataObjBaseSerializer(KubernetesBaseSerializer):
     class Meta:
         model = KubernetesMetadataObjBase
@@ -41,16 +32,6 @@ class KubernetesMetadataObjBaseSerializer(KubernetesBaseSerializer):
 
 
 
-class KubernetesPodTemplateSerializer(KubernetesMetadataObjBaseSerializer):
-    class Meta:
-        model = KubernetesPodTemplate
-        fields = KubernetesMetadataObjBaseSerializer.Meta.fields + [
-            'volume', 'primary_container', 'secondary_container',
-            'restart_policy'
-        ]
-
-
-
 class KubernetesNetworkingBaseSerializer(KubernetesMetadataObjBaseSerializer):
     class Meta:
         model = KubernetesNetworkingBase
@@ -58,6 +39,35 @@ class KubernetesNetworkingBaseSerializer(KubernetesMetadataObjBaseSerializer):
             'api_version', 'kind', 'port', 'namespace', 'kuid'
         ]
         abstract = True
+
+
+
+class KubernetesNamespaceSerializer(KubernetesMetadataObjBaseSerializer):
+    class Meta:
+        model = KubernetesNamespace
+        fields = KubernetesMetadataObjBaseSerializer.Meta.fields + [
+            'api_version', 'kind', 'exists'
+        ]
+
+
+
+class KubernetesContainerSerializer(KubernetesBaseSerializer):
+    class Meta:
+        model = KubernetesContainer
+        fields = KubernetesBaseSerializer.Meta.fields + [
+            'image_name', 'image_tag', 'image_pull_policy',
+            'command', 'args', 'port', 'volume_mount'
+        ]
+
+
+
+class KubernetesPodTemplateSerializer(KubernetesMetadataObjBaseSerializer):
+    class Meta:
+        model = KubernetesPodTemplate
+        fields = KubernetesMetadataObjBaseSerializer.Meta.fields + [
+            'volume', 'primary_container', 'secondary_container',
+            'restart_policy'
+        ]
 
 
 
