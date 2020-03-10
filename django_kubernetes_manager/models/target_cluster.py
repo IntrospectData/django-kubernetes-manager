@@ -6,7 +6,7 @@ import yaml
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django_extensions.db.models import TitleDescriptionModel
+from django_extensions.db.models import TitleSlugDescriptionModel
 
 from ..utils import log, split_kubeconfig
 
@@ -16,7 +16,7 @@ RANGE_TEMPLATE = "{}://{}/api/v1/query_range?query={}&start={}&end={}&step={}"
 TELEMETRY_SOURCE = (("p", "Prometheus"),)
 
 
-class TargetCluster(TitleDescriptionModel):
+class TargetCluster(TitleSlugDescriptionModel):
 
     api_endpoint = models.URLField(help_text="Cluster Endpoint URL")
     telemetry_endpoint = models.URLField(help_text="Telemetry Endpoint URL")
@@ -59,7 +59,3 @@ class TargetCluster(TitleDescriptionModel):
         else:
             log.warning("No clusters added")
         return ret_val
-
-    # class Meta(UUIDAuditModelBase.Meta):
-    #     verbose_name = "Target Cluster"
-    #     verbose_name_plural = "Target Clusters"

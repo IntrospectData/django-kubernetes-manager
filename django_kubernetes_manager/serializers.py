@@ -16,7 +16,7 @@ class TargetClusterSerializer(serializers.HyperlinkedModelSerializer):
 class KubernetesBaseSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = KubernetesBase
-        fields = ['name', 'description', 'cluster', 'config']
+        fields = ['title', 'description', 'cluster', 'config']
         abstract = True
 
 
