@@ -50,13 +50,13 @@ class KubernetesTelemetryMixin(models.Model):
     def read_pod_metrics(self):
         api_instance = self.get_client(API=client.CustomObjectsApi)
         pod_name = self.slug
-        pod_namespace = self.slugspace
+        pod_namespace = self.namespace
         items = api_instance.list_cluster_custom_object('metrics.k8s.io', 'v1beta1', 'pods').get("items", [])
         return [pod for pod in items if pod_name in pod.get("metadata", {}).get("name") and pod_namespace in pod.get("metadata", {}).get("namespace")]
 
     def read_pod_usage(self):
         pod_name = self.pod_template.name
-        pod_namespace = self.slugspace
+        pod_namespace = self.namespace
         pod_metrics = self.read_pod_metrics()
         cpu = 0.000
         memory = 0
@@ -85,6 +85,9 @@ class KubernetesBase(TitleSlugDescriptionModel):
     class Meta:
         abstract = True
 
+    def slugify_function(self, content):
+        return self.title.replace("_", "-").replace(" ", "-").lower()
+
     def get_client(self, API=client.CoreV1Api, **kwargs):
         """Gets a k8s api client based on the credential associated with this instance
 
@@ -104,7 +107,7 @@ class KubernetesBase(TitleSlugDescriptionModel):
                 cc = self.cluster.config
             with open(ntf.name, "w") as f:
                 f.write(cc)
-            return API(api_client=config.new_client_from_config(context=self.cluster.config['contexts'][0]['name']))
+            return API(api_client=config.new_client_from_config(config_file=ntf.name))
 
 
 
@@ -225,25 +228,25 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         )
 
     def deploy(self):
-        api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
+        api_instance = self.get_client(API=client.AppsV1Api)
         body = self.get_obj()
         api_response = api_instance.create_namespaced_deployment(
             body = body,
-            namespace = self.slugspace
+            namespace = self.namespace
         )
         self.kuid = api_response.metadata.uid
         self.save()
-        return api_response
+        return str(api_response.status)
 
     def k_delete(self):
-        api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
+        api_instance = self.get_client(API=client.AppsV1Api)
         api_response = api_instance.delete_namespaced_deployment(
             name = self.slug,
-            namespace = self.slugspace
+            namespace = self.namespace
         )
         self.kuid = None
         self.save()
-        return api_response
+        return str(api_response.status)
 
 
 
@@ -272,21 +275,21 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         body = self.get_obj()
         api_response = api_instance.create_namespaced_job(
             body = body,
-            namespace = self.slugspace
+            namespace = self.namespace
         )
         self.kuid = api_response.metadata.uid
         self.save()
-        return api_response
+        return str(api_response.status)
 
     def k_delete(self):
         api_instance = self.get_client(API=client.BatchV1Api)
         api_response = api_instance.delete_namespaced_job(
             name = self.slug,
-            namespace = self.slugspace
+            namespace = self.namespace
         )
         self.kuid = None
         self.save()
-        return api_response
+        return str(api_response.status)
 
 
 
@@ -317,21 +320,21 @@ class KubernetesService(KubernetesNetworkingBase):
         body = self.get_obj()
         api_response = api_instance.create_namespaced_service(
             body = body,
-            namespace = self.slugspace
+            namespace = self.namespace
         )
         self.kuid = api_response.metadata.uid
         self.save()
-        return api_response
+        return str(api_response.status)
 
     def k_delete(self):
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
         api_response = api_instance.delete_namespaced_service(
             name = self.slug,
-            namespace = self.slugspace
+            namespace = self.namespace
         )
         self.kuid = None
         self.save()
-        return api_response
+        return str(api_response.status)
 
 
 class KubernetesIngress(KubernetesNetworkingBase):
@@ -369,18 +372,18 @@ class KubernetesIngress(KubernetesNetworkingBase):
         body = self.get_obj()
         api_response = api_instance.create_namespaced_ingress(
             body = body,
-            namespace = self.slugspace
+            namespace = self.namespace
         )
         self.kuid = api_response.metadata.uid
         self.save()
-        return api_response
+        return str(api_response.status)
 
     def k_delete(self):
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
         api_response = api_instance.delete_namespaced_ingress(
             name = self.slug,
-            namespace = self.slugspace
+            namespace = self.namespace
         )
         self.kuid = None
         self.save()
-        return api_response
+        return str(api_response.status)
