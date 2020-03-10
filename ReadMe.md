@@ -37,7 +37,12 @@ KubernetesService
 
 KubernetesIngress
 
+KubernetesNamespace
 
-## DRF API
+## API Docs
+
+```bash
+  ./manage.py runserver
+```
 
 *See http(s)://localhost:8000/api/redoc for documentation*

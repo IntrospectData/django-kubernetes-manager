@@ -31,6 +31,15 @@ byte_units = {
 
 
 class KubernetesTelemetryMixin(models.Model):
+    """
+    ========================
+    KubernetesTelemetryMixin
+    ========================
+    :type: mixin
+    :inherits: django.db.models.Model
+    :fields: object_status, average_cpu_usage,
+        average_mem_usage, cpu_usage_seconds, mem_usage_seconds
+    """
     object_status = models.CharField(max_length=128, null=True, blank=True)
     average_cpu_usage = models.DecimalField(null=True, blank=True, max_digits=8, decimal_places=4)
     average_mem_usage = models.IntegerField(null=True, blank=True)
@@ -41,6 +50,10 @@ class KubernetesTelemetryMixin(models.Model):
         abstract = True
 
     def splitNumeric(self, size):
+        """
+        :description: Parses string into numeric component.
+        :
+        """
         return filter(None, re.split(r'(\d+)', size))
 
     def parseSize(self, size):
