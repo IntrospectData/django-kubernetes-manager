@@ -7,14 +7,8 @@ Welcome to Django Kubernetes Manager's documentation!
 =====================================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Contents:
-
-Modules
-========
-.. autosummary::
-   :toctree: module_docs
-   django_kubernetes_manager.models
 
 Indices and tables
 ==================
