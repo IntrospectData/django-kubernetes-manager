@@ -44,7 +44,8 @@ Getting Started
 
     path('dkm/', include('django_kubernetes_manager.urls')),
 
-3. To create the models in your database::
+3. To create models in your database, run::
+  
     python manage.py migrate
 
     * Requires Postgresql or other database with JSON support.
