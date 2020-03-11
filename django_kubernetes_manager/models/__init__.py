@@ -1,2 +1,5 @@
-from .base import *
-from .target_cluster import *
+from .base import (KubernetesContainer, KubernetesDeployment,
+                   KubernetesIngress, KubernetesJob, KubernetesNamespace,
+                   KubernetesPodTemplate, KubernetesService, KubernetesVolume,
+                   KubernetesVolumeMount)
+from .target_cluster import TargetCluster
