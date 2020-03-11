@@ -1,7 +1,8 @@
 
 .. image:: images/dkm-logo.png
    :width: 600
-   : DjangoKubernetesManager
+   :alt: DjangoKubernetesManager
+
    
 Django Kubernetes Manager is a Django app that enables you to control a
 a Kubernetes cluster using the Python API and Django Rest Framework.
