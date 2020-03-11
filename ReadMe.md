@@ -39,6 +39,6 @@ KubernetesIngress
 
 KubernetesNamespace
 
-## [API Docs](https://github.com/IntrospectData/Django-kubernetes-manager/openapi.md)
+## [API Docs](https://github.com/IntrospectData/Django-Kubernetes-Manager/blob/master/docs/openapi.md)
 
 ## [General Docs](https://django-kubernetes-manager.readthedocs.io/en/latest/index.html)
