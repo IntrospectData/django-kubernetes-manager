@@ -45,4 +45,6 @@ KubernetesNamespace
   ./manage.py runserver
 ```
 
-*See http(s)://localhost:8000/api/redoc for documentation*
+*See [http(s)://localhost:8000/api/redoc](http(s)://localhost:8000/api/redoc) for documentation*
+
+## [General Docs](https://django-kubernetes-manager.readthedocs.io/en/latest/index.html)
