@@ -12,10 +12,6 @@ import re
 def get_dict_hash(data):
     return hashlib.md5(json.dumps({k: data[k] for k in sorted(data.keys())}).encode("utf-8")).hexdigest()
 
-
-log = logging.getLogger(__name__)
-config.load_kube_config()
-
 def run_command(cmd, log_method=log.info):
     """Subprocess wrapper for capturing output of processes to logs
     """
