@@ -23,6 +23,7 @@ django.setup()
 project = 'Django Kubernetes Manager'
 copyright = '2020, Bradley Reimers'
 author = 'Bradley Reimers'
+master_doc = 'index'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1.0'
