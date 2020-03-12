@@ -68,7 +68,7 @@ class KubernetesTelemetryMixin(models.Model):
         return [pod for pod in items if pod_name in pod.get("metadata", {}).get("name") and pod_namespace in pod.get("metadata", {}).get("namespace")]
 
     def read_pod_usage(self):
-        pod_name = self.pod_template.name
+        pod_name = self.pod_template.slug
         pod_namespace = self.namespace
         pod_metrics = self.read_pod_metrics()
         cpu = 0.000
@@ -411,7 +411,7 @@ class KubernetesIngress(KubernetesNetworkingBase):
                             path=self.path,
                             backend=client.NetworkingV1beta1IngressBackend(
                                 service_port=self.target_service.port,
-                                service_name=self.target_service.name
+                                service_name=self.target_service.slug
                             )
                         )]
                     )
