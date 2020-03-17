@@ -193,7 +193,7 @@ class KubernetesVolume(KubernetesBase):
 
 class KubernetesConfigMap(KubernetesMetadataObjBase):
     kind = models.CharField(max_length=16, default="ConfigMap")
-    data = models.JSONField(default=dict, null=True, blank=True)
+    data = JSONField(default=dict, null=True, blank=True)
 
     def get_obj(self):
         return client.V1ConfigMap(
