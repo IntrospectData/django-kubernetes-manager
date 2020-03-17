@@ -32,9 +32,7 @@ byte_units = {
 
 class KubernetesTelemetryMixin(models.Model):
     """
-    ========================
     KubernetesTelemetryMixin
-    ========================
     :type: mixin
     :inherits: django.db.models.Model
     :fields: object_status, average_cpu_usage,
@@ -190,6 +188,44 @@ class KubernetesVolume(KubernetesBase):
             name=self.slug,
             empty_dir={}
         )
+
+
+
+class KubernetesConfigMap(KubernetesMetadataObjBase):
+    kind = models.CharField(max_length=16, default="ConfigMap")
+    data = models.JSONField(default=dict, null=True, blank=True)
+
+    def get_obj(self):
+        return client.V1ConfigMap(
+            metadata=client.V1ObjectMeta(
+                name = self.slug,
+                labels=self.labels,
+                annotations=self.annotations
+            ),
+            kind = self.kind,
+            data = self.data
+        )
+
+    def deploy(self):
+        api_instance = self.get_client(API=client.CoreV1Api)
+        body = self.get_obj()
+        api_response = api_instance.create_namespaced_config_map(
+            body = body,
+            namespace = self.namespace
+        )
+        self.kuid = api_response.metadata.uid
+        self.save()
+        return str(api_response.status)
+
+    def k_delete(self):
+        api_instance = self.get_client(API=client.CoreV1Api)
+        api_response = api_instance.delete_namespaced_config_map(
+            name = self.slug,
+            namespace = self.namespace
+        )
+        self.kuid = None
+        self.save()
+        return str(api_response.status)
 
 
 
