@@ -1,6 +1,8 @@
 version: 2.1
+orbs:
+  python: circleci/python@0.2.1
 jobs:
-  publish:
+  build:
     executor: python/default
     steps:
       - checkout
@@ -13,4 +15,14 @@ jobs:
           name: Build packages
       - run:
           command: |
-            python -m twine upload --repository-url https://upload.pypi.org/legacy/ -u $PYPI_USER -p $PYPI_PASS
+            python -m twine upload --repository-url https://upload.pypi.org/legacy/ -u $PYPI_USER -p $PYPI_PASS dist/*
+          name: Publish to PyPi
+workflows:
+  main:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^v[0-9]+(\.[0-9]+)*$/
