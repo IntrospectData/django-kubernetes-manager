@@ -186,7 +186,20 @@ class KubernetesVolume(KubernetesBase):
     def get_obj(self):
         return client.V1Volume(
             name=self.slug,
-            empty_dir={}
+            empty_dir=client.V1EmptyDirVolumeSource()
+        )
+
+
+
+class KubernetesVolumeMount(KubernetesBase):
+    mount_path = models.CharField(max_length=255, default="/media")
+    sub_path = models.CharField(max_length=255, default=None, null=True, blank=True)
+
+    def get_obj(self):
+        return client.V1VolumeMount(
+            name=self.slug,
+            mount_path=self.mount_path,
+            sub_path=self.sub_path
         )
 
 
@@ -226,19 +239,6 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
         self.kuid = None
         self.save()
         return str(api_response.status)
-
-
-
-class KubernetesVolumeMount(KubernetesBase):
-    mount_path = models.CharField(max_length=255, default="/media")
-    sub_path = models.CharField(max_length=255, default=None, null=True, blank=True)
-
-    def get_obj(self):
-        return client.V1VolumeMount(
-            name=self.slug,
-            mount_path=self.mount_path,
-            sub_path=slef.sub_path
-        )
 
 
 
