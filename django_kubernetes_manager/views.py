@@ -3,13 +3,15 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import (KubernetesContainer, KubernetesDeployment,
                      KubernetesIngress, KubernetesJob, KubernetesPodTemplate,
-                     KubernetesService, TargetCluster, KubernetesNamespace)
+                     KubernetesService, TargetCluster, KubernetesNamespace,
+                     KubernetesConfigMap)
 from .serializers import (KubernetesContainerSerializer,
                           KubernetesDeploymentSerializer,
                           KubernetesIngressSerializer, KubernetesJobSerializer,
                           KubernetesPodTemplateSerializer,
                           KubernetesServiceSerializer, TargetClusterSerializer,
-                          KubernetesNamespaceSerializer)
+                          KubernetesNamespaceSerializer,
+                          KubernetesConfigMapSerializer)
 
 
 
@@ -44,6 +46,30 @@ class KubernetesNamespaceViewSet(viewsets.ModelViewSet):
         Action to delete the kubernetes namespace from the cluster.
         """
         return Response(KubernetesNamespace.objects.get(pk=kwargs['pk']).k_delete())
+
+
+
+class KubernetesConfigMapViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows configmaps to be edited or deleted
+    """
+    queryset = KubernetesConfigMap.objects.all()
+    serializer_class = KubernetesConfigMapSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    @action(methods=['post', 'get'], detail=True)
+    def deploy(self, request, *args, **kwargs):
+        """
+        Action to deploy the ConfigMap resource to target cluster.
+        """
+        return Response(KubernetesConfigMap.objects.get(pk=kwargs['pk']).deploy())
+
+    @action(methods=['post', 'get'], detail=True)
+    def k_delete(self, request, *args, **kwargs):
+        """
+        Action to delete the kubernetes ConfigMap from the cluster.
+        """
+        return Response(KubernetesConfigMap.objects.get(pk=kwargs['pk']).k_delete())
 
 
 

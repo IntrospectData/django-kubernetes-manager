@@ -32,11 +32,13 @@ router.register(r'ingresses', views.KubernetesIngressViewSet)
 router.register(r'jobs', views.KubernetesJobViewSet)
 router.register(r'clusters', views.TargetClusterViewSet)
 router.register(r'namespaces', views.KubernetesNamespaceViewSet)
+router.register(r'configmaps', views.KubernetesConfigMapViewSet)
+
 
 urlpatterns = [
-    path('api/', include(router.urls)),
-    path('api/auth/', include('rest_framework.urls', namespace='rest')),
-    url(r'^api/swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    path('api/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
-    path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    path('dkm/', include(router.urls)),
+    path('dkm/auth/', include('rest_framework.urls', namespace='rest')),
+    url(r'^dkm/swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('dkm/swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('dkm/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
 ]

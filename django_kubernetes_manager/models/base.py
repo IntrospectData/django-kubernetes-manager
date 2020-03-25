@@ -32,9 +32,7 @@ byte_units = {
 
 class KubernetesTelemetryMixin(models.Model):
     """
-    ========================
     KubernetesTelemetryMixin
-    ========================
     :type: mixin
     :inherits: django.db.models.Model
     :fields: object_status, average_cpu_usage,
@@ -68,7 +66,7 @@ class KubernetesTelemetryMixin(models.Model):
         return [pod for pod in items if pod_name in pod.get("metadata", {}).get("name") and pod_namespace in pod.get("metadata", {}).get("namespace")]
 
     def read_pod_usage(self):
-        pod_name = self.pod_template.name
+        pod_name = self.pod_template.slug
         pod_namespace = self.namespace
         pod_metrics = self.read_pod_metrics()
         cpu = 0.000
@@ -188,7 +186,7 @@ class KubernetesVolume(KubernetesBase):
     def get_obj(self):
         return client.V1Volume(
             name=self.slug,
-            empty_dir={}
+            empty_dir=client.V1EmptyDirVolumeSource()
         )
 
 
@@ -201,8 +199,46 @@ class KubernetesVolumeMount(KubernetesBase):
         return client.V1VolumeMount(
             name=self.slug,
             mount_path=self.mount_path,
-            sub_path=slef.sub_path
+            sub_path=self.sub_path
         )
+
+
+
+class KubernetesConfigMap(KubernetesMetadataObjBase):
+    kind = models.CharField(max_length=16, default="ConfigMap")
+    data = JSONField(default=dict, null=True, blank=True)
+
+    def get_obj(self):
+        return client.V1ConfigMap(
+            metadata=client.V1ObjectMeta(
+                name = self.slug,
+                labels=self.labels,
+                annotations=self.annotations
+            ),
+            kind = self.kind,
+            data = self.data
+        )
+
+    def deploy(self):
+        api_instance = self.get_client(API=client.CoreV1Api)
+        body = self.get_obj()
+        api_response = api_instance.create_namespaced_config_map(
+            body = body,
+            namespace = self.namespace
+        )
+        self.kuid = api_response.metadata.uid
+        self.save()
+        return str(api_response.status)
+
+    def k_delete(self):
+        api_instance = self.get_client(API=client.CoreV1Api)
+        api_response = api_instance.delete_namespaced_config_map(
+            name = self.slug,
+            namespace = self.namespace
+        )
+        self.kuid = None
+        self.save()
+        return str(api_response.status)
 
 
 
@@ -411,7 +447,7 @@ class KubernetesIngress(KubernetesNetworkingBase):
                             path=self.path,
                             backend=client.NetworkingV1beta1IngressBackend(
                                 service_port=self.target_service.port,
-                                service_name=self.target_service.name
+                                service_name=self.target_service.slug
                             )
                         )]
                     )
