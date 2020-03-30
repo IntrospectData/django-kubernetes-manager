@@ -182,8 +182,14 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
 
 
 class KubernetesVolume(KubernetesBase):
-
     def get_obj(self):
+        if self.config.get("configmap"):
+            return client.V1Volume(
+                name=self.slug,
+                config_map=client.V1ConfigMapVolumeSource(
+                    name = self.config.get("configmap")
+                )
+            )
         return client.V1Volume(
             name=self.slug,
             empty_dir=client.V1EmptyDirVolumeSource()
