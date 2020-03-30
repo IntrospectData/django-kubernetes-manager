@@ -252,8 +252,8 @@ class KubernetesContainer(KubernetesBase):
     image_name = models.CharField(max_length=200, db_index=True, help_text="Properly qualified image name to execute this job within", default="debian")
     image_tag = models.CharField(max_length=100, db_index=True, help_text="Tag name for the image to be used for this job", default="latest")
     image_pull_policy = models.CharField(max_length=16, choices=PULL_POLICY, default='IfNotPresent')
-    command = models.TextField(help_text="Command to run when instantiating container", null=True, blank=True, default="/bin/sh")
-    args = models.TextField(help_text="Comma separated args to run with command when instantiating container.", null=True, blank=True, default="-c,sleep 6000")
+    command = models.TextField(help_text="Command to run when instantiating container", null=True, blank=True)
+    args = models.TextField(help_text="Comma separated args to run with command when instantiating container.", null=True, blank=True)
     port = models.IntegerField(default=80)
     volume_mount = models.ForeignKey('KubernetesVolumeMount', null=True, blank=True, on_delete=models.SET_NULL)
 
