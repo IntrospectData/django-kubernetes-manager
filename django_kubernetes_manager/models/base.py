@@ -213,7 +213,9 @@ class KubernetesVolumeMount(KubernetesBase):
 class KubernetesConfigMap(KubernetesMetadataObjBase):
     kind = models.CharField(max_length=16, default="ConfigMap")
     data = JSONField(default=dict, null=True, blank=True)
-
+    binary = models.BinaryField(null=True, blank=True)
+    override_name = models.CharField(max_length=32, null=True, blank=True, default="ConfigMap")
+   
     def get_obj(self):
         return client.V1ConfigMap(
             metadata=client.V1ObjectMeta(
@@ -222,7 +224,8 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
                 annotations=self.annotations
             ),
             kind = self.kind,
-            data = self.data
+            data = self.data if self.data else None,
+            binary_data = {str(self.override_name): self.binary} if self.binary else None
         )
 
     def deploy(self):
