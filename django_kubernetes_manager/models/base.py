@@ -215,7 +215,8 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
     data = JSONField(default=dict, null=True, blank=True)
     binary = models.BinaryField(null=True, blank=True)
     override_name = models.CharField(max_length=32, null=True, blank=True, default="ConfigMap")
-   
+    namespace = models.CharField(max_length=64, default="default")
+    
     def get_obj(self):
         return client.V1ConfigMap(
             metadata=client.V1ObjectMeta(
