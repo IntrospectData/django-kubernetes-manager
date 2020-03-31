@@ -1,11 +1,11 @@
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import (KubernetesContainer, KubernetesDeployment,
+from ..models import (KubernetesContainer, KubernetesDeployment,
                      KubernetesIngress, KubernetesJob, KubernetesPodTemplate,
                      KubernetesService, TargetCluster, KubernetesNamespace,
                      KubernetesConfigMap)
-from .serializers import (KubernetesContainerSerializer,
+from ..serializers import (KubernetesContainerSerializer,
                           KubernetesDeploymentSerializer,
                           KubernetesIngressSerializer, KubernetesJobSerializer,
                           KubernetesPodTemplateSerializer,
