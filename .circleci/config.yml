@@ -2,6 +2,12 @@ version: 2.1
 orbs:
   python: circleci/python@0.2.1
 jobs:
+  skip:
+    executor: default
+    steps:
+      - run:
+          command: |
+            exit 0
   build:
     executor: python/default
     steps:
@@ -20,6 +26,10 @@ jobs:
 workflows:
   main:
     jobs:
+      - skip:
+          filters:
+            branches: 
+              only: master
       - build:
           filters:
             tags:
