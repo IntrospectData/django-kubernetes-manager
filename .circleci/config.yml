@@ -3,7 +3,6 @@ orbs:
   python: circleci/python@0.2.1
 jobs:
   skip:
-    executor: default
     steps:
       - run:
           command: |
