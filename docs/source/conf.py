@@ -14,7 +14,7 @@ import os
 import sys
 import django
 sys.path.insert(0, os.path.abspath('../..'))
-os.environ['DJANGO_SETTINGS_MODULE'] = 'dkm.settings'
+os.environ['DJANGO_SETTINGS_MODULE'] = '_django.settings'
 django.setup()
 
 
@@ -52,7 +52,7 @@ autodoc_mock_imports = ["django", "kubernetes", "rest_framework", "django_extens
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = "sphinx_rtd_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,

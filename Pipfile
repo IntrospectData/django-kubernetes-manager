@@ -14,6 +14,7 @@ psycopg2 ="*"
 django_extensions ='*'
 drf-yasg = "*"
 djangorestframework = "*"
+sphinx_rtd_theme = "*"
 
 [requires]
 python_version = "3.7"

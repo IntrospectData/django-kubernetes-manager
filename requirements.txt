@@ -8,3 +8,4 @@ drf-yasg
 djangorestframework
 twine
 setuptools
+sphinx_rtd_theme

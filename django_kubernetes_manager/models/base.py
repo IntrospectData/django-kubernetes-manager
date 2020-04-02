@@ -51,7 +51,6 @@ class KubernetesTelemetryMixin(models.Model):
     def splitNumeric(self, size):
         """
         :description: Parses string into numeric component.
-        :
         """
         return filter(None, re.split(r'(\d+)', size))
 

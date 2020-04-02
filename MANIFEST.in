@@ -2,3 +2,8 @@ include LICENSE
 include README.rst
 recursive-include licenses *
 recursive-include docs *
+exclude manage.py
+exclude Pipfile
+exclude Pipfile.lock
+recursive-exclude _django *
+exclude docker-compose.yml

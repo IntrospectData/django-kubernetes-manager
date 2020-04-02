@@ -1,18 +1,22 @@
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from ..models import (KubernetesContainer, KubernetesDeployment,
-                     KubernetesIngress, KubernetesJob, KubernetesPodTemplate,
-                     KubernetesService, TargetCluster, KubernetesNamespace,
-                     KubernetesConfigMap)
-from ..serializers import (KubernetesContainerSerializer,
-                          KubernetesDeploymentSerializer,
-                          KubernetesIngressSerializer, KubernetesJobSerializer,
-                          KubernetesPodTemplateSerializer,
-                          KubernetesServiceSerializer, TargetClusterSerializer,
-                          KubernetesNamespaceSerializer,
-                          KubernetesConfigMapSerializer)
 
+from ..models import (KubernetesConfigMap, KubernetesContainer,
+                      KubernetesDeployment, KubernetesIngress, KubernetesJob,
+                      KubernetesNamespace, KubernetesPodTemplate,
+                      KubernetesService, KubernetesVolume,
+                      KubernetesVolumeMount, TargetCluster)
+from ..serializers import (KubernetesConfigMapSerializer,
+                           KubernetesContainerSerializer,
+                           KubernetesDeploymentSerializer,
+                           KubernetesIngressSerializer,
+                           KubernetesJobSerializer,
+                           KubernetesNamespaceSerializer,
+                           KubernetesPodTemplateSerializer,
+                           KubernetesServiceSerializer,
+                           KubernetesVolumeMountSerializer,
+                           KubernetesVolumeSerializer, TargetClusterSerializer)
 
 
 class TargetClusterViewSet(viewsets.ModelViewSet):
@@ -70,6 +74,26 @@ class KubernetesConfigMapViewSet(viewsets.ModelViewSet):
         Action to delete the kubernetes ConfigMap from the cluster.
         """
         return Response(KubernetesConfigMap.objects.get(pk=kwargs['pk']).k_delete())
+
+
+
+class KubernetesVolumeViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows volumes to be edited or deleted.
+    """
+    queryset = KubernetesVolume.objects.all()
+    serializer_class = KubernetesVolumeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+
+
+class KubernetesVolumeMountViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows volumes to be edited or deleted.
+    """
+    queryset = KubernetesVolumeMount.objects.all()
+    serializer_class = KubernetesVolumeMountSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
 
 

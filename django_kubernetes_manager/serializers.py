@@ -4,7 +4,8 @@ from .models import (KubernetesBase, KubernetesConfigMap, KubernetesContainer,
                      KubernetesDeployment, KubernetesIngress, KubernetesJob,
                      KubernetesMetadataObjBase, KubernetesNamespace,
                      KubernetesNetworkingBase, KubernetesPodTemplate,
-                     KubernetesService, TargetCluster)
+                     KubernetesService, KubernetesVolume,
+                     KubernetesVolumeMount, TargetCluster)
 
 
 class TargetClusterSerializer(serializers.HyperlinkedModelSerializer):
@@ -42,6 +43,22 @@ class KubernetesNetworkingBaseSerializer(KubernetesMetadataObjBaseSerializer):
 
 
 
+class KubernetesVolumeSerializer(KubernetesBaseSerializer):
+    class Meta:
+        model = KubernetesVolume
+        fields = KubernetesBaseSerializer.Meta.fields
+
+
+
+class KubernetesVolumeMountSerializer(KubernetesBaseSerializer):
+    class Meta:
+        model = KubernetesVolumeMount
+        fields = KubernetesBaseSerializer.Meta.fields + [
+            'mount_path', 'sub_path'
+        ]
+
+
+
 class KubernetesNamespaceSerializer(KubernetesMetadataObjBaseSerializer):
     class Meta:
         model = KubernetesNamespace
@@ -57,6 +74,7 @@ class KubernetesConfigMapSerializer(KubernetesMetadataObjBaseSerializer):
         fields = KubernetesMetadataObjBaseSerializer.Meta.fields + [
             'data', 'kind',
         ]
+
 
 
 class KubernetesContainerSerializer(KubernetesBaseSerializer):

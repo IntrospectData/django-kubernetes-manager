@@ -1,2 +1,8 @@
-from .model_views import *
-#from .func_views import *
+from .model_views import (KubernetesConfigMapViewSet,
+                          KubernetesDeploymentViewSet,
+                          KubernetesIngressViewSet, KubernetesJobViewSet,
+                          KubernetesNamespaceViewSet,
+                          KubernetesPodTemplateViewSet,
+                          KubernetesServiceViewSet,
+                          KubernetesVolumeMountViewSet,
+                          KubernetesVolumeViewSet, TargetClusterViewSet)
