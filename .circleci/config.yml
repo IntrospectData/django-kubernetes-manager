@@ -9,21 +9,15 @@ jobs:
       - python/install-deps
       - run:
           command: |
-            sphinx-build docs/source docs/build
-          name: generate documentation
-      - run:
-          command: |
-              git config --global user.email "b.a.reimers@gmail.com"
-              git config --global user.name "breimers"
-          name: log in to git
-      - run:
-          command: |
+            git config --global user.email "b.a.reimers@gmail.com"
+            git config --global user.name "breimers"
             git branch docs
             git checkout docs
+            sphinx-build docs/source docs/build
             git add -A
             git commit -m "docs"
             git push origin docs
-          name: commit to docs branch
+          name: build and commit to docs branch
       - run:
           command: |
             curl -X POST -d "branches=docs"-d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/django-kubernetes-manager/117046/
