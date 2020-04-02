@@ -2,12 +2,6 @@ version: 2.1
 orbs:
   python: circleci/python@0.2.1
 jobs:
-  skip:
-    executor: python/default
-    steps:
-      - run:
-          command: |
-            exit 0
   build:
     executor: python/default
     steps:
@@ -17,20 +11,22 @@ jobs:
       - python/save-cache
       - run:
           command: |
+            sed -i "s/TAG/$CIRCLE_TAG/g" setup.cfg
+          name: Setting version to Git Tag.
+      - run:
+          command: |
             python setup.py sdist bdist_wheel
-          name: Build packages
+          name: Building packages
       - run:
           command: |
             python -m twine upload --repository-url https://upload.pypi.org/legacy/ -u $PYPI_USER -p $PYPI_PASS dist/*
-          name: Publish to PyPi
+          name: Publishing to PyPi
 workflows:
   main:
     jobs:
-      - skip:
-          filters:
-            branches: 
-              only: master
       - build:
           filters:
+            branches:
+              ignore: /.*/
             tags:
-              only: /^[0-9]+(\.[0-9]+)*$/
+              only: /^\d+\.\d+\.\d+$/
