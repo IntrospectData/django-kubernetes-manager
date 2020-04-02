@@ -15,6 +15,11 @@ jobs:
           name: generate documentation
       - run:
           command: |
+              git config --global user.email "b.a.reimers@gmail.com"
+              git config --global user.name "breimers"
+          name: log in to git
+      - run:
+          command: |
             git add -A; git commit -m "docs"; git push origin docs
           name: commit to docs branch
       - run:
