@@ -3,7 +3,8 @@ orbs:
   python: circleci/python@0.2.1
 jobs:
   skip:
-    docker: alpine:stable
+    docker: 
+      -image: alpine:stable
     steps:
       - run:
           command: |
