@@ -15,6 +15,7 @@ django_extensions ='*'
 drf-yasg = "*"
 djangorestframework = "*"
 sphinx_rtd_theme = "*"
+Sphinx ="*"
 
 [requires]
 python_version = "3.7"

@@ -2,6 +2,25 @@ version: 2.1
 orbs:
   python: circleci/python@0.2.1
 jobs:
+  docs:
+    executor: python/default
+    steps:
+      - checkout
+      - python/load-cache
+      - python/install-deps
+      - python/save-cache
+      - run:
+          command: |
+            sphinx-build docs/source docs/build
+          name: generate documentation
+      - run:
+          command: |
+            git add -A; git commit -m "docs"; git push origin docs
+          name: commit to docs branch
+      - run:
+          command: |
+            curl -X POST -d "branches=docs"-d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/django-kubernetes-manager/117046/
+          name: trigger RTD build
   build:
     executor: python/default
     steps:
@@ -24,6 +43,12 @@ jobs:
 workflows:
   main:
     jobs:
+      - docs:
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /^\d+\.\d+\.\d+$/
       - build:
           filters:
             branches:
