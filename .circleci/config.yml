@@ -3,24 +3,12 @@ orbs:
   python: circleci/python@0.2.1
 jobs:
   docs:
-    executor: python/default
+    docker:
+      - image: curlimages/curl
     steps:
-      - checkout
-      - python/install-deps
       - run:
           command: |
-            git config --global user.email "b.a.reimers@gmail.com"
-            git config --global user.name "breimers"
-            git branch docs
-            git checkout docs
-            sphinx-build docs/source docs/build
-            git add -A
-            git commit -m "docs"
-            git push origin docs
-          name: build and commit to docs branch
-      - run:
-          command: |
-            curl -X POST -d "branches=docs"-d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/django-kubernetes-manager/117046/
+            curl -X POST -d "token=$RTD_TOKEN" https://readthedocs.org/api/v2/webhook/django-kubernetes-manager/117046/
           name: trigger RTD build
   build:
     executor: python/default
