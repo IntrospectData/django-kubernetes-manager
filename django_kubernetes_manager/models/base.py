@@ -1,12 +1,13 @@
 import json
 import re
 from tempfile import NamedTemporaryFile
+from time import sleep
 from uuid import uuid4
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django_extensions.db.models import TitleSlugDescriptionModel
 
+from django_extensions.db.models import TitleSlugDescriptionModel
 from kubernetes import client, config
 
 PULL_POLICY = [
@@ -83,7 +84,18 @@ class KubernetesTelemetryMixin(models.Model):
                 memory += self.parseSize(cmem)
         return {'cpu': cpu, 'memory': memory}
 
-
+    def status(self):
+        type = self._meta.model_name
+        name = self.slug
+        namespace = self.namespace.slug
+        api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
+        if type == 'kubernetesjob':
+            api_response = api_instance.read_namespaced_job_status(
+                name, namespace)
+        if type == 'kubernetesdeployment':
+            api_response = api_instance.read_namespaced_deployment_status(
+                name, namespace)
+        return api_response.status
 
 class KubernetesBase(TitleSlugDescriptionModel):
     id = models.UUIDField(default=uuid4, editable=False, primary_key=True)
@@ -216,7 +228,7 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
     binary = models.BinaryField(null=True, blank=True)
     override_name = models.CharField(max_length=32, null=True, blank=True, default="ConfigMap")
     namespace = models.CharField(max_length=64, default="default")
-    
+
     def get_obj(self):
         return client.V1ConfigMap(
             metadata=client.V1ObjectMeta(
@@ -331,6 +343,16 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
             body = body,
             namespace = self.namespace
         )
+        ticker = 0
+        while self.status().unavailable_replicas > 0:
+            if ticker >= self.config.get("timeout", 60):
+                raise Exception(
+                    'Timeout: no replicas available after {} ticks'.format(
+                        str(ticker)
+                    )
+                )
+            ticker +=1
+            sleep(1)
         self.kuid = api_response.metadata.uid
         self.save()
         return str(api_response.status)
