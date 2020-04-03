@@ -18,13 +18,17 @@ class TargetClusterTestCase(TestCase):
 
 
 
-class KubernetesNamespaceFactory(TestCase):
+class KubernetesNamespaceTestCase(TestCase):
 
     def test_model(self):
-        pass
+        obj = KubernetesNamespaceFactory()
+        self.assertIsNotNone(obj)
+        self.assertIsNotNone(obj.pk)
 
     def test_get_obj(self):
-        pass
+        obj = KubernetesNamespaceFactory()
+        obj = obj.get_obj()
+        self.assertIsNotNone(obj)
 
     def test_api(self):
         pass
@@ -34,10 +38,14 @@ class KubernetesNamespaceFactory(TestCase):
 class KubernetesVolumeTestCase(TestCase):
 
     def test_model(self):
-        pass
+        obj = KubernetesVolumeFactory()
+        self.assertIsNotNone(obj)
+        self.assertIsNotNone(obj.pk)
 
     def test_get_obj(self):
-        pass
+        obj = KubernetesVolumeFactory()
+        obj = obj.get_obj()
+        self.assertIsNotNone(obj)
 
     def test_api(self):
         pass
@@ -47,10 +55,14 @@ class KubernetesVolumeTestCase(TestCase):
 class KubernetesVolumeMountTestCase(TestCase):
 
     def test_model(self):
-        pass
+        obj = KubernetesVolumeMountFactory()
+        self.assertIsNotNone(obj)
+        self.assertIsNotNone(obj.pk)
 
     def test_get_obj(self):
-        pass
+        obj = KubernetesVolumeMountFactory()
+        obj = obj.get_obj()
+        self.assertIsNotNone(obj)
 
     def test_api(self):
         pass
@@ -60,10 +72,14 @@ class KubernetesVolumeMountTestCase(TestCase):
 class KubernetesConfigMapTestCase(TestCase):
 
     def test_model(self):
-        pass
+        obj = KubernetesConfigMapFactory()
+        self.assertIsNotNone(obj)
+        self.assertIsNotNone(obj.pk)
 
     def test_get_obj(self):
-        pass
+        obj = KubernetesConfigMapFactory()
+        obj = obj.get_obj()
+        self.assertIsNotNone(obj)
 
     def test_api(self):
         pass
@@ -73,10 +89,14 @@ class KubernetesConfigMapTestCase(TestCase):
 class KubernetesContainerTestCase(TestCase):
 
     def test_model(self):
-        pass
+        obj = KubernetesContainerFactory()
+        self.assertIsNotNone(obj)
+        self.assertIsNotNone(obj.pk)
 
     def test_get_obj(self):
-        pass
+        obj = KubernetesContainerFactory()
+        obj = obj.get_obj()
+        self.assertIsNotNone(obj)
 
     def test_api(self):
         pass
@@ -86,10 +106,14 @@ class KubernetesContainerTestCase(TestCase):
 class KubernetesPodTemplateTestCase(TestCase):
 
     def test_model(self):
-        pass
+        obj = KubernetesPodTemplateFactory()
+        self.assertIsNotNone(obj)
+        self.assertIsNotNone(obj.pk)
 
     def test_get_obj(self):
-        pass
+        obj = KubernetesPodTemplateFactory()
+        obj = obj.get_obj()
+        self.assertIsNotNone(obj)
 
     def test_api(self):
         pass
@@ -99,13 +123,13 @@ class KubernetesPodTemplateTestCase(TestCase):
 class KubernetesDeploymentTestCase(TestCase):
 
     def test_model(self):
-        dep = KubernetesDeploymentFactory()
-        self.assertIsNotNone(dep)
-        self.assertIsNotNone(dep.pk)
+        obj = KubernetesDeploymentFactory()
+        self.assertIsNotNone(obj)
+        self.assertIsNotNone(obj.pk)
 
     def test_get_obj(self):
-        dep = KubernetesDeploymentFactory()
-        obj = dep.get_obj()
+        obj = KubernetesDeploymentFactory()
+        obj = obj.get_obj()
         self.assertIsNotNone(obj)
 
     def test_api(self):
@@ -116,13 +140,13 @@ class KubernetesDeploymentTestCase(TestCase):
 class KubernetesJobTestCase(TestCase):
 
     def test_model(self):
-        job = KubernetesJobFactory()
-        self.assertIsNotNone(job)
-        self.assertIsNotNone(job.pk)
+        obj = KubernetesJobFactory()
+        self.assertIsNotNone(obj)
+        self.assertIsNotNone(obj.pk)
 
     def test_get_obj(self):
-        job = KubernetesJobFactory()
-        obj = job.get_obj()
+        obj = KubernetesJobFactory()
+        obj = obj.get_obj()
         self.assertIsNotNone(obj)
 
     def test_api(self):

@@ -27,21 +27,52 @@ class TargetClusterFactory(DMF):
 
 
 class KubernetesConfigMapFactory(DMF):
-    pass
+    class Meta:
+        model = models_path + 'KubernetesConfigMap'
+
+    name = factory.fuzzy.FuzzyText(length=8, suffix="-cm")
+    description = fake.sentence()
+    cluster = factory.SubFactory(TargetClusterFactory)
+    config = {"data_is_fake": "true"}
+    deployed = None
+    deleted = None
+    kind = "ConfigMap"
+    data = {"data": factory.FuzzyText(length=12)}
+    namespace = "test"
 
 
 
 class KubernetesVolumeFactory(DMF):
-    pass
+    class Meta:
+        model = models_path + 'KubernetesVolume'
+
+    name = factory.fuzzy.FuzzyText(length=8, suffix="-vol")
+    description = fake.sentence()
+    cluster = factory.SubFactory(TargetClusterFactory)
+    config = {"data_is_fake": "true"}
+    deployed = None
+    deleted = None
 
 
 
 class KubernetesVolumeMountFactory(DMF):
-    pass
+    class Meta:
+        model = models_path + 'KubernetesVolumeMount'
 
+    name = factory.fuzzy.FuzzyText(length=8, suffix="-mount")
+    description = fake.sentence()
+    cluster = factory.SubFactory(TargetClusterFactory)
+    config = {"data_is_fake": "true"}
+    deployed = None
+    deleted = None
+    mount_path = "/media"
+    sub_path = None
 
 
 class KubernetesNamespaceFactory(DMF):
+    class Meta:
+        model = models_path + 'KubernetesNamespace'
+
     name = factory.fuzzy.FuzzyText(length=8, suffix="-ns")
     description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
