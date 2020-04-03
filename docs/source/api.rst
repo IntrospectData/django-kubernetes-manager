@@ -1,4 +1,5 @@
-OpenAPI Documentation
-======================
+API Spec
+==========
 
 .. openapi:: openapi.yml
+  :group:
