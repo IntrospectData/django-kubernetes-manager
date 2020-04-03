@@ -1,4 +1,5 @@
 from .model_views import (KubernetesConfigMapViewSet,
+                          KubernetesContainerViewSet,
                           KubernetesDeploymentViewSet,
                           KubernetesIngressViewSet, KubernetesJobViewSet,
                           KubernetesNamespaceViewSet,
