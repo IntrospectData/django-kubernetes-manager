@@ -7,7 +7,6 @@ from .factories import (KubernetesConfigMapFactory, KubernetesContainerFactory,
                         KubernetesNamespaceFactory)
 
 
-
 class TargetClusterTestCase(TestCase):
 
     def test_model(self):
@@ -30,10 +29,33 @@ class KubernetesNamespaceTestCase(TestCase):
         obj = obj.get_obj()
         self.assertIsNotNone(obj)
 
-    def test_api(self):
-        pass
+    def namespace_create_api(self):
+        arf = APIRequestFactory()
+        req = arf.post(
+            '/namespaces/',
+            {
+                'title': str(factory.fuzzy.FuzzyText()),
+                'description': str(factory.fuzzy.FuzzyText()),
+                'cluster': 'http://127.0.0.1:8000/dkm/api/clusters/1/',
+                'labels': {"app": "test"},
+                'annotations': {"type": "project"},
+                'api_version': "v1",
+                'kind': "Namespace",
+                'exists': False
+            }
+        )
 
+    def namespace_deploy_api(self):
+        arf = APIRequestFactory()
+        req = arf.get('/namespaces/{}/deploy'.format(id))
 
+    def namespace_remove_api(self):
+        arf = APIRequestFactory()
+        req = arf.get('/namespaces/{}/remove'.format(id))
+
+    def namespace_delete_api(self):
+        arf = APIRequestFactory()
+        req = arf.delete('/namespaces/{}/'.format(id))
 
 class KubernetesVolumeTestCase(TestCase):
 

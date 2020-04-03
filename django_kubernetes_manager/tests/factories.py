@@ -26,6 +26,24 @@ class TargetClusterFactory(DMF):
 
 
 
+class KubernetesNamespaceFactory(DMF):
+    class Meta:
+        model = models_path + 'KubernetesNamespace'
+
+    title = factory.fuzzy.FuzzyText(length=8, suffix="-ns")
+    description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
+    cluster = factory.SubFactory(TargetClusterFactory)
+    config = {"data_is_fake": "true"}
+    deployed = None
+    removed = None
+    labels = {"app": fake.word()}
+    annotations = None
+    api_version = "v1"
+    kind = "Namespace"
+    exists = False
+
+
+
 class KubernetesConfigMapFactory(DMF):
     class Meta:
         model = models_path + 'KubernetesConfigMap'
@@ -35,10 +53,10 @@ class KubernetesConfigMapFactory(DMF):
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
-    deleted = None
+    removed = None
     kind = "ConfigMap"
     data = {"data": str(factory.fuzzy.FuzzyText(length=12))}
-    namespace = "test"
+    namespace = factory.SubFactory(KubernetesNamespaceFactory)
 
 
 
@@ -51,7 +69,7 @@ class KubernetesVolumeFactory(DMF):
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
-    deleted = None
+    removed = None
 
 
 
@@ -64,26 +82,9 @@ class KubernetesVolumeMountFactory(DMF):
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
-    deleted = None
+    removed = None
     mount_path = "/media"
     sub_path = None
-
-
-class KubernetesNamespaceFactory(DMF):
-    class Meta:
-        model = models_path + 'KubernetesNamespace'
-
-    title = factory.fuzzy.FuzzyText(length=8, suffix="-ns")
-    description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
-    cluster = factory.SubFactory(TargetClusterFactory)
-    config = {"data_is_fake": "true"}
-    deployed = None
-    deleted = None
-    labels = {"app": fake.word()}
-    annotations = None
-    api_version = "v1"
-    kind = "Namespace"
-    exists = False
 
 
 
@@ -96,7 +97,7 @@ class KubernetesContainerFactory(DMF):
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
-    deleted = None
+    removed = None
     image_name= factory.fuzzy.FuzzyChoice(["debian", "alpine", "busybox"])
     image_tag = "latest"
     image_pull_policy = "IfNotPresent"
@@ -116,7 +117,7 @@ class KubernetesPodTemplateFactory(DMF):
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
-    deleted = None
+    removed = None
     labels = {"app": fake.word()}
     annotations = None
     volume = None
@@ -135,13 +136,13 @@ class KubernetesDeploymentFactory(DMF):
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
-    deleted = None
+    removed = None
     labels = {"app": fake.word()}
     annotations = None
     api_version = 'apps/v1'
     kind = 'Deployment'
     port = factory.fuzzy.FuzzyChoice([80, 8080, 8000])
-    namespace = 'test'
+    namespace = factory.SubFactory(KubernetesNamespaceFactory)
     kuid = None
     selector = labels
     replicas = 1
@@ -158,13 +159,13 @@ class KubernetesJobFactory(DMF):
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
-    deleted = None
+    removed = None
     labels = {"app": fake.word()}
     annotations = None
     api_version = 'apps/v1'
     kind = 'Deployment'
     port = factory.fuzzy.FuzzyChoice([80, 8080, 8000])
-    namespace = 'test'
+    namespace = factory.SubFactory(KubernetesNamespaceFactory)
     kuid = None
     pod_template = factory.SubFactory(KubernetesPodTemplateFactory)
     backoff_limit = factory.fuzzy.FuzzyInteger(1, 10)

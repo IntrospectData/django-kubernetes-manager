@@ -4,12 +4,14 @@
    :alt: DjangoKubernetesManager
 
 
-Django Kubernetes Manager is an ongoing project to wrap the complexity of Kubernetes management in the simplicity of Django Rest Framework.
+Django Kubernetes Manager is an open source project to wrap the complexity of Kubernetes management in the simplicity of Django Rest Framework.
 
 License
 --------
-This project is license under the MIT license. Please see the license dir for
-dependency licenses.
+This project is license under the MIT license.
+
+
+Please see the license dir for dependency licenses.
 
 Docs
 -------

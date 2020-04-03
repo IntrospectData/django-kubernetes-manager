@@ -12,7 +12,6 @@ schema_view = get_schema_view(
       title="DKM API",
       default_version='v0.1.0',
       description="Django Kubernetes Manager",
-      terms_of_service="https://introspectdata.com/terms-service/",
       contact=openapi.Contact(email="bradley@introspectdata.com"),
       license=openapi.License(
         name="MIT License",

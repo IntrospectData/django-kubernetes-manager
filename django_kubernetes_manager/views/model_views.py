@@ -37,14 +37,14 @@ class KubernetesNamespaceViewSet(viewsets.ModelViewSet):
     serializer_class = KubernetesNamespaceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def deploy(self, request, *args, **kwargs):
         """
         Action to deploy the namespace resource to target cluster.
         """
         return Response(KubernetesNamespace.objects.get(pk=kwargs['pk']).deploy())
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes namespace from the cluster.
@@ -61,14 +61,14 @@ class KubernetesConfigMapViewSet(viewsets.ModelViewSet):
     serializer_class = KubernetesConfigMapSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def deploy(self, request, *args, **kwargs):
         """
         Action to deploy the ConfigMap resource to target cluster.
         """
         return Response(KubernetesConfigMap.objects.get(pk=kwargs['pk']).deploy())
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes ConfigMap from the cluster.
@@ -125,21 +125,21 @@ class KubernetesDeploymentViewSet(viewsets.ModelViewSet):
     serializer_class = KubernetesDeploymentSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def deploy(self, request, *args, **kwargs):
         """
         Action to deploy the kubernetes resource to target cluster.
         """
         return Response(KubernetesDeployment.objects.get(pk=kwargs['pk']).deploy())
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes resource from the cluster/namespaces
         """
         return Response(KubernetesDeployment.objects.get(pk=kwargs['pk']).remove())
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def pod_usage(self, request, *args, **kwargs):
         """
         Action to fetch point-in-time cpu and memory usage of pod.
@@ -156,14 +156,14 @@ class KubernetesServiceViewSet(viewsets.ModelViewSet):
     serializer_class = KubernetesServiceSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def deploy(self, request, *args, **kwargs):
         """
         Action to deploy the kubernetes resource to target cluster.
         """
         return Response(KubernetesService.objects.get(pk=kwargs['pk']).deploy())
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes resource from the cluster/namespace.
@@ -180,14 +180,14 @@ class KubernetesIngressViewSet(viewsets.ModelViewSet):
     serializer_class = KubernetesIngressSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def deploy(self, request, *args, **kwargs):
         """
         Action to deploy the kubernetes resource to target cluster.
         """
         return Response(KubernetesIngress.objects.get(pk=kwargs['pk']).deploy())
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes resource from the cluster/namespace.
@@ -204,21 +204,21 @@ class KubernetesJobViewSet(viewsets.ModelViewSet):
     serializer_class = KubernetesJobSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def deploy(self, request, *args, **kwargs):
         """
         Action to deploy the kubernetes resource to target cluster.
         """
         return Response(KubernetesJob.objects.get(pk=kwargs['pk']).deploy())
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes resource from the target cluster/ns.
         """
         return Response(KubernetesJob.objects.get(pk=kwargs['pk']).remove())
 
-    @action(methods=['post', 'get'], detail=True)
+    @action(methods=['get'], detail=True)
     def pod_usage(self, request, *args, **kwargs):
         """
         Action to fetch point-in-time cpu and memory usage of pod.

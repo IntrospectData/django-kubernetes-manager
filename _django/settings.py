@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_kubernetes_manager',
     'rest_framework',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
