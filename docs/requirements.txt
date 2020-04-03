@@ -50,3 +50,7 @@ text-unidecode==1.3
 uritemplate==3.0.1
 urllib3==1.25.8
 websocket-client==0.57.0
+sphinx_rtd_theme
+Sphinx
+sphinxcontrib-openapi
+sphinxcontrib-httpdomain
