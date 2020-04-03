@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a35314d11086a411603bf33f6105261c8f2dbf521bd7bca02d75c45b417a95e9"
+            "sha256": "1685ace5d465a655b87d5c76fb57b2928e18270ed5508bd0e1fa3906b566fc5d"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -360,6 +360,7 @@
                 "sha256:b4c750d546ab6d7e05bdff6ac24db8ae3e8b8253a3569b754e445110a0a12b66",
                 "sha256:fc312670b56cb54920d6cc2ced455a22a547910de10b3142276495ced49231cb"
             ],
+            "index": "pypi",
             "version": "==2.4.4"
         },
         "sphinx-rtd-theme": {

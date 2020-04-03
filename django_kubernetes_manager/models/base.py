@@ -35,19 +35,24 @@ class KubernetesTelemetryMixin(models.Model):
     """
     KubernetesTelemetryMixin
     :type: mixin
+    :description: Extends child model to include telemetry features.
     :inherits: django.db.models.Model
     :fields: object_status, average_cpu_usage,
         average_mem_usage, cpu_usage_seconds, mem_usage_seconds
     """
-    object_status = models.CharField(max_length=128, null=True, blank=True)
+    object_status = models.CharField(max_length=128, null=True, blank=True,
+        help_text="status of the object in Kubernetes"
+    )
     average_cpu_usage = models.DecimalField(null=True, blank=True, max_digits=8,
-        decimal_places=4
+        decimal_places=4, help_text="Average PIT CPU units consumed"
     )
-    average_mem_usage = models.IntegerField(null=True, blank=True)
+    average_mem_usage = models.IntegerField(null=True, blank=True,
+        help_text="Average PIT bytes consumed")
     cpu_usage_seconds = models.DecimalField(null=True, blank=True, max_digits=8,
-        decimal_places=4
+        decimal_places=4, help_text="Average cpu usage * seconds live")
     )
-    mem_usage_seconds = models.IntegerField(null=True, blank=True)
+    mem_usage_seconds = models.IntegerField(null=True, blank=True,
+        help_text="Average mem usage * seconds live")
 
     class Meta:
         abstract = True
@@ -59,10 +64,16 @@ class KubernetesTelemetryMixin(models.Model):
         return filter(None, re.split(r'(\d+)', size))
 
     def parseSize(self, size):
+        """
+        :description: Parses string as numeric, suffix and converts to bytes.
+        """
         number, unit = [string for string in self.splitNumeric(size)]
         return int(float(number)*byte_units[unit])
 
     def read_pod_metrics(self):
+        """
+        :description: Uses metrics_server to get  cadvisor data.
+        """
         api_instance = self.get_client(API=client.CustomObjectsApi)
         pod_name = self.slug
         pod_namespace = self.namespace
@@ -73,6 +84,9 @@ class KubernetesTelemetryMixin(models.Model):
                 ).get("namespace")]
 
     def read_pod_usage(self):
+        """
+        :description: Converts metrics into dictionary for api usage.
+        """
         pod_name = self.pod_template.slug
         pod_namespace = self.namespace
         pod_metrics = self.read_pod_metrics()
@@ -91,6 +105,9 @@ class KubernetesTelemetryMixin(models.Model):
         return {'cpu': cpu, 'memory': memory}
 
     def status(self):
+        """
+        :description: Returns status data of object.
+        """
         type = self._meta.model_name
         name = self.slug
         namespace = self.namespace.slug
@@ -104,6 +121,13 @@ class KubernetesTelemetryMixin(models.Model):
         return api_response.status
 
 class KubernetesBase(TitleSlugDescriptionModel):
+    """
+    KubernetesBase
+    :type: model (abstract)
+    :description: Base parent model that all subsequent models inherit from.
+    :inherits: django_extensions.db.models.TitleSlugDescriptionModel
+    :fields: id, cluster, config, deployed, deleted
+    """
     id = models.UUIDField(default=uuid4, editable=False, primary_key=True)
     cluster = models.ForeignKey('TargetCluster', on_delete=models.SET_NULL,
         null=True
@@ -117,6 +141,9 @@ class KubernetesBase(TitleSlugDescriptionModel):
         abstract = True
 
     def slugify_function(self, content):
+        """
+        :description: Overrides default slugify with custom logic.
+        """
         return self.title.replace("_", "-").replace(" ", "-").lower()
 
     def get_client(self, API=client.CoreV1Api, **kwargs):
@@ -145,6 +172,13 @@ class KubernetesBase(TitleSlugDescriptionModel):
 
 
 class KubernetesMetadataObjBase(KubernetesBase):
+    """
+    KubernetesMetadataObjBase
+    :type: model (abstract)
+    :description: Extends KubernetesBase to include metadata fields.
+    :inherits: django_kubernetes_manager.models.base.KubernetesBase
+    :fields: labels, annotations
+    """
     labels = JSONField(default=dict)
     annotations = JSONField(default=dict, null=True, blank=True)
 
@@ -154,6 +188,13 @@ class KubernetesMetadataObjBase(KubernetesBase):
 
 
 class KubernetesNetworkingBase(KubernetesMetadataObjBase):
+    """
+    KubernetesNetworkingBase
+    :type: model (abstract)
+    :description: Extends KubernetesMetadataObjBase to include network fields.
+    :inherits: django_kubernetes_manager.models.base.KubernetesMetadataObjBase
+    :fields: labels, annotations
+    """
     api_version = models.CharField(max_length=16, default="v1")
     kind = models.CharField(max_length=16)
     port = models.IntegerField(default=80)
@@ -168,11 +209,21 @@ class KubernetesNetworkingBase(KubernetesMetadataObjBase):
 
 
 class KubernetesNamespace(KubernetesMetadataObjBase):
+    """
+    KubernetesNetworkingBase
+    :type: model
+    :description: Holds data related to a Kubernetes namespace.
+    :inherits: django_kubernetes_manager.models.base.KubernetesMetadataObjBase
+    :fields: api_version, kind, exists
+    """
     api_version = models.CharField(max_length=16, default="v1")
     kind = models.CharField(max_length=16, default="Namespace")
     exists = models.BooleanField(default=False)
 
     def get_obj(self):
+        """
+        :description: Generate namespace spec.
+        """
          return client.V1Namespace(
             api_version = self.api_version,
             kind = self.kind,
@@ -185,6 +236,9 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
          )
 
     def deploy(self):
+        """
+        :description: Deploy namespace obj.
+        """
         api_instance = self.get_client(API=client.CoreV1Api)
         body = self.get_obj()
         api_response = api_instance.create_namespace(
@@ -194,7 +248,10 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
         self.save()
         return str(api_response.status)
 
-    def k_delete(self):
+    def remove(self):
+        """
+        :description: Delete namespace from cluster.
+        """
         api_instance = self.get_client(API=client.CoreV1Api)
         api_response = api_instance.delete_namespace(
             name = self.slug,
@@ -206,7 +263,17 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
 
 
 class KubernetesVolume(KubernetesBase):
+    """
+    KubernetesVolume
+    :type: model
+    :description: Holds data related to a kubernetes volume.
+    :inherits: django_kubernetes_manager.models.base.KubernetesBase
+    :fields: *
+    """
     def get_obj(self):
+        """
+        :description: Generate volume spec.
+        """
         if self.config.get("configmap"):
             return client.V1Volume(
                 name=self.slug,
@@ -222,12 +289,22 @@ class KubernetesVolume(KubernetesBase):
 
 
 class KubernetesVolumeMount(KubernetesBase):
+    """
+    KubernetesVolumeMount
+    :type: model
+    :description: Holds data related to a kubernetes volume mount.
+    :inherits: django_kubernetes_manager.models.base.KubernetesBase
+    :fields: mount_path, sub_path
+    """
     mount_path = models.CharField(max_length=255, default="/media")
     sub_path = models.CharField(max_length=255, default=None, null=True,
         blank=True
     )
 
     def get_obj(self):
+        """
+        :description: Generate mount spec.
+        """
         return client.V1VolumeMount(
             name=self.slug,
             mount_path=self.mount_path,
@@ -236,55 +313,17 @@ class KubernetesVolumeMount(KubernetesBase):
 
 
 
-class KubernetesConfigMap(KubernetesMetadataObjBase):
-    kind = models.CharField(max_length=16, default="ConfigMap")
-    data = JSONField(default=dict, null=True, blank=True)
-    binary = models.BinaryField(null=True, blank=True)
-    override_name = models.CharField(max_length=32, null=True, blank=True,
-        default="ConfigMap"
-    )
-    namespace = models.CharField(max_length=64, default="default")
-
-    def get_obj(self):
-        return client.V1ConfigMap(
-            metadata=client.V1ObjectMeta(
-                name = self.slug,
-                labels=self.labels,
-                annotations=self.annotations
-            ),
-            kind = self.kind,
-            data = self.data if self.data else None,
-            binary_data = {
-                str(self.override_name): self.binary
-            } if self.binary else None
-        )
-
-    def deploy(self):
-        api_instance = self.get_client(API=client.CoreV1Api)
-        body = self.get_obj()
-        api_response = api_instance.create_namespaced_config_map(
-            body = body,
-            namespace = self.namespace
-        )
-        self.kuid = api_response.metadata.uid
-        self.save()
-        return str(api_response.status)
-
-    def k_delete(self):
-        api_instance = self.get_client(API=client.CoreV1Api)
-        api_response = api_instance.delete_namespaced_config_map(
-            name = self.slug,
-            namespace = self.namespace
-        )
-        self.kuid = None
-        self.save()
-        return str(api_response.status)
-
-
-
 class KubernetesContainer(KubernetesBase):
+    """
+    KubernetesContainer
+    :type: model
+    :description: Holds data related to a kubernetes contaienr.
+    :inherits: django_kubernetes_manager.models.base.KubernetesBase
+    :fields: image_name, image_tag, image_pull_policy, command, args, port,
+        volume_mount
+    """
     image_name = models.CharField(max_length=200, db_index=True,
-        help_text="Properly qualified image name to execute this job within",
+        help_text="Properly qualified image name.",
         default="debian"
     )
     image_tag = models.CharField(max_length=100, db_index=True,
@@ -305,6 +344,9 @@ class KubernetesContainer(KubernetesBase):
         blank=True, on_delete=models.SET_NULL)
 
     def get_obj(self):
+        """
+        :description: Generate container spec.
+        """
         return client.V1Container(
             name = self.slug,
             image = ':'.join([self.image_name, self.image_tag]),
@@ -319,7 +361,76 @@ class KubernetesContainer(KubernetesBase):
 
 
 
+class KubernetesConfigMap(KubernetesMetadataObjBase):
+    """
+    KubernetesConfigMap
+    :type: model
+    :description: Holds data related to a kubernetes volume mount.
+    :inherits: django_kubernetes_manager.models.base.KubernetesMetadataObjBase
+    :fields: kind, data, binary, override_name, namespace
+    """
+    kind = models.CharField(max_length=16, default="ConfigMap")
+    data = JSONField(default=dict, null=True, blank=True)
+    binary = models.BinaryField(null=True, blank=True)
+    override_name = models.CharField(max_length=32, null=True, blank=True,
+        default="ConfigMap"
+    )
+    namespace = models.CharField(max_length=64, default="default")
+
+    def get_obj(self):
+        """
+        :description: Generate configmap spec.
+        """
+        return client.V1ConfigMap(
+            metadata=client.V1ObjectMeta(
+                name = self.slug,
+                labels=self.labels,
+                annotations=self.annotations
+            ),
+            kind = self.kind,
+            data = self.data if self.data else None,
+            binary_data = {
+                str(self.override_name): self.binary
+            } if self.binary else None
+        )
+
+    def deploy(self):
+        """
+        :description: Deploy configmap obj.
+        """
+        api_instance = self.get_client(API=client.CoreV1Api)
+        body = self.get_obj()
+        api_response = api_instance.create_namespaced_config_map(
+            body = body,
+            namespace = self.namespace
+        )
+        self.kuid = api_response.metadata.uid
+        self.save()
+        return str(api_response.status)
+
+    def remove(self):
+        """
+        :description: Delete configmap from namespace.
+        """
+        api_instance = self.get_client(API=client.CoreV1Api)
+        api_response = api_instance.delete_namespaced_config_map(
+            name = self.slug,
+            namespace = self.namespace
+        )
+        self.kuid = None
+        self.save()
+        return str(api_response.status)
+
+
+
 class KubernetesPodTemplate(KubernetesMetadataObjBase):
+    """
+    KubernetesPodTemplate
+    :type: model
+    :description: Holds data related to a kubernetes pod spec.
+    :inherits: django_kubernetes_manager.models.base.KubernetesMetadataObjBase
+    :fields: volume, primary_container, secondary_container, restart_policy
+    """
     volume = models.ForeignKey('KubernetesVolume', null=True, blank=True,
         on_delete=models.SET_NULL
     )
@@ -335,6 +446,9 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
     )
 
     def get_obj(self):
+        """
+        :description: Generate pod spec.
+        """
         return client.V1PodTemplateSpec(
             metadata=client.V1ObjectMeta(
                 name = self.slug,
@@ -358,6 +472,14 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
 
 
 class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
+    """
+    KubernetesDeployment
+    :type: model
+    :description: Holds data related to a kubernetes deployment.
+    :inherits: django_kubernetes_manager.models.base.KubernetesNetworkingBase,
+        django_kubernetes_manager.models.base.KubernetesTelemetryMixin
+    :fields: selector, replicas, pod_template
+    """
     selector = JSONField(default=dict)
     replicas = models.IntegerField(default=1)
     pod_template = models.ForeignKey('KubernetesPodTemplate',
@@ -365,6 +487,9 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
     )
 
     def get_obj(self):
+        """
+        :description: Generate Deployment spec.
+        """
         return client.V1Deployment(
             api_version=self.api_version,
             kind=self.kind,
@@ -381,6 +506,9 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         )
 
     def deploy(self):
+        """
+        :description: Deploy deployment obj.
+        """
         api_instance = self.get_client(API=client.AppsV1Api)
         body = self.get_obj()
         api_response = api_instance.create_namespaced_deployment(
@@ -401,7 +529,10 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         self.save()
         return str(api_response.status)
 
-    def k_delete(self):
+    def remove(self):
+        """
+        :description: Remove deployment from namespace.
+        """
         api_instance = self.get_client(API=client.AppsV1Api)
         api_response = api_instance.delete_namespaced_deployment(
             name = self.slug,
@@ -414,12 +545,23 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
 
 
 class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
+    """
+    KubernetesJob
+    :type: model
+    :description: Holds data related to a kubernetes pod spec.
+    :inherits: django_kubernetes_manager.models.base.KubernetesNetworkingBase,
+        django_kubernetes_manager.models.base.KubernetesTelemetryMixin
+    :fields: selector, replicas, pod_template
+    """
     pod_template = models.ForeignKey('KubernetesPodTemplate',
         on_delete=models.CASCADE
     )
     backoff_limit = models.IntegerField(default=3)
 
     def get_obj(self):
+        """
+        :description: Generate job spec.
+        """
         return client.V1Job(
             api_version=self.api_version,
             kind=self.kind,
@@ -436,6 +578,9 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         )
 
     def deploy(self):
+        """
+        :description: Deploy job to ns.
+        """
         api_instance = self.get_client(API=client.BatchV1Api)
         body = self.get_obj()
         api_response = api_instance.create_namespaced_job(
@@ -446,7 +591,10 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         self.save()
         return str(api_response.status)
 
-    def k_delete(self):
+    def remove(self):
+        """
+        :description: Remove job from ns.
+        """
         api_instance = self.get_client(API=client.BatchV1Api)
         api_response = api_instance.delete_namespaced_job(
             name = self.slug,
@@ -459,10 +607,20 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
 
 
 class KubernetesService(KubernetesNetworkingBase):
+    """
+    KubernetesService
+    :type: model
+    :description: Holds data related to a kubernetes service.
+    :inherits: django_kubernetes_manager.models.base.KubernetesNetworkingBase
+    :fields: selector, target_port
+    """
     selector = JSONField(default=dict)
     target_port = models.IntegerField(default=80)
 
     def get_obj(self):
+        """
+        :description: Generate service spec.
+        """
         return client.V1Service(
             api_version = self.api_version,
             kind = self.kind,
@@ -481,6 +639,9 @@ class KubernetesService(KubernetesNetworkingBase):
         )
 
     def deploy(self):
+        """
+        :description: Deploy service to ns.
+        """
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
         body = self.get_obj()
         api_response = api_instance.create_namespaced_service(
@@ -491,7 +652,10 @@ class KubernetesService(KubernetesNetworkingBase):
         self.save()
         return str(api_response.status)
 
-    def k_delete(self):
+    def remove(self):
+        """
+        :description: Remove service from ns.
+        """
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
         api_response = api_instance.delete_namespaced_service(
             name = self.slug,
@@ -504,6 +668,13 @@ class KubernetesService(KubernetesNetworkingBase):
 
 
 class KubernetesIngress(KubernetesNetworkingBase):
+    """
+    KubernetesIngress
+    :type: model
+    :description: Holds data related to a kubernetes ingress.
+    :inherits: django_kubernetes_manager.models.base.KubernetesNetworkingBase
+    :fields: hostname, path, target_service
+    """
     hostname = models.CharField(max_length=255, default="localhost")
     path = models.CharField(max_length=255, default="/")
     target_service = models.ForeignKey('KubernetesService',
@@ -511,6 +682,9 @@ class KubernetesIngress(KubernetesNetworkingBase):
     )
 
     def get_obj(self):
+        """
+        :description: Generate ingress obj.
+        """
         return client.NetworkingV1beta1Ingress(
             api_version=self.api_version,
             kind=self.kind,
@@ -536,6 +710,9 @@ class KubernetesIngress(KubernetesNetworkingBase):
         )
 
     def deploy(self):
+        """
+        :description: Deploy ingress to ns.
+        """
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
         body = self.get_obj()
         api_response = api_instance.create_namespaced_ingress(
@@ -546,7 +723,10 @@ class KubernetesIngress(KubernetesNetworkingBase):
         self.save()
         return str(api_response.status)
 
-    def k_delete(self):
+    def remove(self):
+        """
+        :description: Remove ingress from ns.
+        """
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
         api_response = api_instance.delete_namespaced_ingress(
             name = self.slug,
