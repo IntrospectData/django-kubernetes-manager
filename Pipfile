@@ -16,6 +16,8 @@ drf-yasg = "*"
 djangorestframework = "*"
 sphinx_rtd_theme = "*"
 Sphinx ="*"
+sphinxcontrib-openapi = "*"
+sphinxcontrib-httpdomain ='*'
 
 [requires]
 python_version = "3.7"

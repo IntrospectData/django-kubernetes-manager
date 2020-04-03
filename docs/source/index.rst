@@ -20,7 +20,7 @@ Table of Contents
    serializers
    views
    utils
-
+   api
 
 Indices and tables
 ==================
