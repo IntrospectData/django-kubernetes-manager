@@ -1,11 +1,17 @@
+from django_kubernetes_manager.models import (KubernetesBase,
+                                              KubernetesConfigMap,
+                                              KubernetesContainer,
+                                              KubernetesDeployment,
+                                              KubernetesIngress, KubernetesJob,
+                                              KubernetesMetadataObjBase,
+                                              KubernetesNamespace,
+                                              KubernetesNetworkingBase,
+                                              KubernetesPodTemplate,
+                                              KubernetesService,
+                                              KubernetesVolume,
+                                              KubernetesVolumeMount,
+                                              TargetCluster)
 from rest_framework import serializers
-
-from .models import (KubernetesBase, KubernetesConfigMap, KubernetesContainer,
-                     KubernetesDeployment, KubernetesIngress, KubernetesJob,
-                     KubernetesMetadataObjBase, KubernetesNamespace,
-                     KubernetesNetworkingBase, KubernetesPodTemplate,
-                     KubernetesService, KubernetesVolume,
-                     KubernetesVolumeMount, TargetCluster)
 
 
 class TargetClusterSerializer(serializers.HyperlinkedModelSerializer):
