@@ -169,7 +169,7 @@ class KubernetesNetworkingBase(KubernetesMetadataObjBase):
 
 class KubernetesNamespace(KubernetesMetadataObjBase):
     api_version = models.CharField(max_length=16, default="v1")
-    kind = models.CharField(max_length=16)
+    kind = models.CharField(max_length=16, default="Namespace")
     exists = models.BooleanField(default=False)
 
     def get_obj(self):

@@ -43,6 +43,8 @@ Quickstart
   ./manage.py migrate
   ./manage.py runserver
 
+* Navigate to django admin and create a TargetCluster
+
 * Sample request
 
 .. code-block:: bash

@@ -1,5 +1,98 @@
 from django.test import TestCase
-from .factories import KubernetesDeploymentFactory, KubernetesJobFactory
+
+from .factories import (KubernetesConfigMapFactory, KubernetesContainerFactory,
+                        KubernetesDeploymentFactory, KubernetesJobFactory,
+                        KubernetesPodTemplateFactory, KubernetesVolumeFactory,
+                        KubernetesVolumeMountFactory, TargetClusterFactory,
+                        KubernetesNamespaceFactory)
+
+
+
+class TargetClusterTestCase(TestCase):
+
+    def test_model(self):
+        pass
+
+    def test_api(self):
+        pass
+
+
+
+class KubernetesNamespaceFactory(TestCase):
+
+    def test_model(self):
+        pass
+
+    def test_get_obj(self):
+        pass
+
+    def test_api(self):
+        pass
+
+
+
+class KubernetesVolumeTestCase(TestCase):
+
+    def test_model(self):
+        pass
+
+    def test_get_obj(self):
+        pass
+
+    def test_api(self):
+        pass
+
+
+
+class KubernetesVolumeMountTestCase(TestCase):
+
+    def test_model(self):
+        pass
+
+    def test_get_obj(self):
+        pass
+
+    def test_api(self):
+        pass
+
+
+
+class KubernetesConfigMapTestCase(TestCase):
+
+    def test_model(self):
+        pass
+
+    def test_get_obj(self):
+        pass
+
+    def test_api(self):
+        pass
+
+
+
+class KubernetesContainerTestCase(TestCase):
+
+    def test_model(self):
+        pass
+
+    def test_get_obj(self):
+        pass
+
+    def test_api(self):
+        pass
+
+
+
+class KubernetesPodTemplateTestCase(TestCase):
+
+    def test_model(self):
+        pass
+
+    def test_get_obj(self):
+        pass
+
+    def test_api(self):
+        pass
 
 
 
@@ -15,6 +108,9 @@ class KubernetesDeploymentTestCase(TestCase):
         obj = dep.get_obj()
         self.assertIsNotNone(obj)
 
+    def test_api(self):
+        pass
+
 
 
 class KubernetesJobTestCase(TestCase):
@@ -28,3 +124,6 @@ class KubernetesJobTestCase(TestCase):
         job = KubernetesJobFactory()
         obj = job.get_obj()
         self.assertIsNotNone(obj)
+
+    def test_api(self):
+        pass

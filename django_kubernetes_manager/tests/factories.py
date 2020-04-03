@@ -26,6 +26,36 @@ class TargetClusterFactory(DMF):
 
 
 
+class KubernetesConfigMapFactory(DMF):
+    pass
+
+
+
+class KubernetesVolumeFactory(DMF):
+    pass
+
+
+
+class KubernetesVolumeMountFactory(DMF):
+    pass
+
+
+
+class KubernetesNamespaceFactory(DMF):
+    name = factory.fuzzy.FuzzyText(length=8, suffix="-ns")
+    description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
+    cluster = factory.SubFactory(TargetClusterFactory)
+    config = {"data_is_fake": "true"}
+    deployed = None
+    deleted = None
+    labels = {"app": fake.word()}
+    annotations = None
+    api_version = "v1"
+    kind = "Namespace"
+    exists = False
+
+
+
 class KubernetesContainerFactory(DMF):
     class Meta:
         model = models_path + 'KubernetesContainer'
@@ -40,7 +70,7 @@ class KubernetesContainerFactory(DMF):
     image_tag = "latest"
     image_pull_policy = "IfNotPresent"
     command = "/bin/sh"
-    args = "-c,sleep 6000"
+    args = "-c,echo SUCCESS"
     port = factory.fuzzy.FuzzyChoice([80, 8080, 8000])
     volume_mount = None
 
@@ -50,7 +80,7 @@ class KubernetesPodTemplateFactory(DMF):
     class Meta:
         model = models_path + 'KubernetesPodTemplate'
 
-    name = factory.fuzzy.FuzzyText(length=8, suffix="-container")
+    name = factory.fuzzy.FuzzyText(length=8, suffix="-pod")
     description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
@@ -69,7 +99,7 @@ class KubernetesDeploymentFactory(DMF):
     class Meta:
         model = models_path + 'KubernetesDeployment'
 
-    name = factory.fuzzy.FuzzyText(length=8, suffix="-container")
+    name = factory.fuzzy.FuzzyText(length=8, suffix="-dep")
     description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
@@ -92,7 +122,7 @@ class KubernetesJobFactory(DMF):
     class Meta:
         model = models_path + 'KubernetesJob'
 
-    name = factory.fuzzy.FuzzyText(length=8, suffix="-container")
+    name = factory.fuzzy.FuzzyText(length=8, suffix="-job")
     description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
