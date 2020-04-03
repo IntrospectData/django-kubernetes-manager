@@ -10,7 +10,9 @@ from kubernetes import client, config
 import re
 
 def get_dict_hash(data):
-    return hashlib.md5(json.dumps({k: data[k] for k in sorted(data.keys())}).encode("utf-8")).hexdigest()
+    return hashlib.md5(
+        json.dumps({k: data[k] for k in sorted(data.keys())}).encode("utf-8")
+    ).hexdigest()
 
 
 log = logging.getLogger(__name__)
@@ -30,7 +32,9 @@ def run_command(cmd, log_method=log.info):
         if not line and ret_val != None:
             break
         log_method(line.decode())
-    log_method("Completed run_command in {} for: {}".format((datetime.utcnow() - start).total_seconds(), " ".join(cmd)))
+    log_method("Completed run_command in {} for: {}".format(
+        (datetime.utcnow() - start).total_seconds(), " ".join(cmd))
+    )
     return ret_val
 
 
@@ -100,8 +104,15 @@ def split_kubeconfig(kubeconfig):
         kubeconfig = yaml.load(kubeconfig, Loader=yaml.FullLoader)
     ret_val = []
     for context in kubeconfig.get("contexts", []):
-        cluster = [x for x in kubeconfig.get("clusters", []) if x.get("name") == context.get("context", {}).get("cluster", "")][0]
-        user = [x for x in kubeconfig.get("users", []) if x.get("name") == context.get("context", {}).get("user", "")][0]
+        cluster = [
+            x for x in kubeconfig.get("clusters", []) if x.get(
+                "name"
+            ) == context.get("context", {}).get("cluster", "")
+        ][0]
+        user = [x for x in kubeconfig.get("users", []) if x.get(
+                "name"
+            ) == context.get("context", {}).get("user", "")
+        ][0]
         if cluster and user:
             ret_val.append(generate_kubeconfig(context, cluster, user))
     return ret_val

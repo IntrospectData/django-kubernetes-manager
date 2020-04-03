@@ -40,9 +40,13 @@ class KubernetesTelemetryMixin(models.Model):
         average_mem_usage, cpu_usage_seconds, mem_usage_seconds
     """
     object_status = models.CharField(max_length=128, null=True, blank=True)
-    average_cpu_usage = models.DecimalField(null=True, blank=True, max_digits=8, decimal_places=4)
+    average_cpu_usage = models.DecimalField(null=True, blank=True, max_digits=8,
+        decimal_places=4
+    )
     average_mem_usage = models.IntegerField(null=True, blank=True)
-    cpu_usage_seconds = models.DecimalField(null=True, blank=True, max_digits=8, decimal_places=4)
+    cpu_usage_seconds = models.DecimalField(null=True, blank=True, max_digits=8,
+        decimal_places=4
+    )
     mem_usage_seconds = models.IntegerField(null=True, blank=True)
 
     class Meta:
@@ -62,8 +66,11 @@ class KubernetesTelemetryMixin(models.Model):
         api_instance = self.get_client(API=client.CustomObjectsApi)
         pod_name = self.slug
         pod_namespace = self.namespace
-        items = api_instance.list_cluster_custom_object('metrics.k8s.io', 'v1beta1', 'pods').get("items", [])
-        return [pod for pod in items if pod_name in pod.get("metadata", {}).get("name") and pod_namespace in pod.get("metadata", {}).get("namespace")]
+        items = api_instance.list_cluster_custom_object('metrics.k8s.io',
+            'v1beta1', 'pods').get("items", [])
+        return [pod for pod in items if pod_name in pod.get("metadata", {}
+            ).get("name") and pod_namespace in pod.get("metadata", {}
+                ).get("namespace")]
 
     def read_pod_usage(self):
         pod_name = self.pod_template.slug
@@ -98,7 +105,9 @@ class KubernetesTelemetryMixin(models.Model):
 
 class KubernetesBase(TitleSlugDescriptionModel):
     id = models.UUIDField(default=uuid4, editable=False, primary_key=True)
-    cluster = models.ForeignKey('TargetCluster', on_delete=models.SET_NULL, null=True)
+    cluster = models.ForeignKey('TargetCluster', on_delete=models.SET_NULL,
+        null=True
+    )
     config = JSONField(default=dict, null=True, blank=True)
     deployed = models.DateTimeField(null=True, blank=True)
     deleted = models.DateTimeField(null=True, blank=True)
@@ -111,7 +120,7 @@ class KubernetesBase(TitleSlugDescriptionModel):
         return self.title.replace("_", "-").replace(" ", "-").lower()
 
     def get_client(self, API=client.CoreV1Api, **kwargs):
-        """Gets a k8s api client based on the credential associated with this instance
+        """Gets a k8s api client
 
             Args:
                 API (client.<type>) - Kubernetes Client Type
@@ -129,7 +138,9 @@ class KubernetesBase(TitleSlugDescriptionModel):
                 cc = self.cluster.config
             with open(ntf.name, "w") as f:
                 f.write(cc)
-            return API(api_client=config.new_client_from_config(config_file=ntf.name))
+            return API(api_client=config.new_client_from_config(
+                config_file=ntf.name)
+            )
 
 
 
@@ -147,7 +158,9 @@ class KubernetesNetworkingBase(KubernetesMetadataObjBase):
     kind = models.CharField(max_length=16)
     port = models.IntegerField(default=80)
     namespace = models.CharField(max_length=64, default="default")
-    kuid = models.CharField(max_length=48, null=True, blank=True, help_text="Object's UID in the cluster")
+    kuid = models.CharField(max_length=48, null=True, blank=True,
+        help_text="Object's UID in the cluster"
+    )
 
     class Meta:
         abstract= True
@@ -210,7 +223,9 @@ class KubernetesVolume(KubernetesBase):
 
 class KubernetesVolumeMount(KubernetesBase):
     mount_path = models.CharField(max_length=255, default="/media")
-    sub_path = models.CharField(max_length=255, default=None, null=True, blank=True)
+    sub_path = models.CharField(max_length=255, default=None, null=True,
+        blank=True
+    )
 
     def get_obj(self):
         return client.V1VolumeMount(
@@ -225,7 +240,9 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
     kind = models.CharField(max_length=16, default="ConfigMap")
     data = JSONField(default=dict, null=True, blank=True)
     binary = models.BinaryField(null=True, blank=True)
-    override_name = models.CharField(max_length=32, null=True, blank=True, default="ConfigMap")
+    override_name = models.CharField(max_length=32, null=True, blank=True,
+        default="ConfigMap"
+    )
     namespace = models.CharField(max_length=64, default="default")
 
     def get_obj(self):
@@ -237,7 +254,9 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
             ),
             kind = self.kind,
             data = self.data if self.data else None,
-            binary_data = {str(self.override_name): self.binary} if self.binary else None
+            binary_data = {
+                str(self.override_name): self.binary
+            } if self.binary else None
         )
 
     def deploy(self):
@@ -264,13 +283,26 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
 
 
 class KubernetesContainer(KubernetesBase):
-    image_name = models.CharField(max_length=200, db_index=True, help_text="Properly qualified image name to execute this job within", default="debian")
-    image_tag = models.CharField(max_length=100, db_index=True, help_text="Tag name for the image to be used for this job", default="latest")
-    image_pull_policy = models.CharField(max_length=16, choices=PULL_POLICY, default='IfNotPresent')
-    command = models.TextField(help_text="Command to run when instantiating container", null=True, blank=True)
-    args = models.TextField(help_text="Comma separated args to run with command when instantiating container.", null=True, blank=True)
+    image_name = models.CharField(max_length=200, db_index=True,
+        help_text="Properly qualified image name to execute this job within",
+        default="debian"
+    )
+    image_tag = models.CharField(max_length=100, db_index=True,
+        help_text="Tag name for the image to be used for this job",
+        default="latest"
+    )
+    image_pull_policy = models.CharField(max_length=16, choices=PULL_POLICY,
+        default='IfNotPresent'
+    )
+    command = models.TextField(help_text="Command to run when start container",
+        null=True, blank=True
+    )
+    args = models.TextField(help_text="Comma separated args to run with command\
+        when instantiating container.", null=True, blank=True
+    )
     port = models.IntegerField(default=80)
-    volume_mount = models.ForeignKey('KubernetesVolumeMount', null=True, blank=True, on_delete=models.SET_NULL)
+    volume_mount = models.ForeignKey('KubernetesVolumeMount', null=True,
+        blank=True, on_delete=models.SET_NULL)
 
     def get_obj(self):
         return client.V1Container(
@@ -288,10 +320,19 @@ class KubernetesContainer(KubernetesBase):
 
 
 class KubernetesPodTemplate(KubernetesMetadataObjBase):
-    volume = models.ForeignKey('KubernetesVolume', null=True, blank=True, on_delete=models.SET_NULL)
-    primary_container = models.ForeignKey('KubernetesContainer', on_delete=models.CASCADE, related_name='primary_container')
-    secondary_container = models.ForeignKey('KubernetesContainer', null=True, blank=True, on_delete=models.SET_NULL, related_name='secondary_container')
-    restart_policy = models.CharField(max_length=16, choices=RESTART_POLICY, default='Never')
+    volume = models.ForeignKey('KubernetesVolume', null=True, blank=True,
+        on_delete=models.SET_NULL
+    )
+    primary_container = models.ForeignKey('KubernetesContainer',
+        on_delete=models.CASCADE, related_name='primary_container'
+    )
+    secondary_container = models.ForeignKey('KubernetesContainer', null=True,
+        blank=True, on_delete=models.SET_NULL,
+        related_name='secondary_container'
+    )
+    restart_policy = models.CharField(max_length=16, choices=RESTART_POLICY,
+        default='Never'
+    )
 
     def get_obj(self):
         return client.V1PodTemplateSpec(
@@ -307,7 +348,9 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
                 containers=[
                     self.primary_container.get_obj(),
                     self.secondary_container.get_obj()
-                ] if self.secondary_container is not None else [self.primary_container.get_obj()],
+                ] if self.secondary_container is not None else [
+                    self.primary_container.get_obj()
+                ],
                 restart_policy = self.restart_policy
             )
         )
@@ -317,7 +360,9 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
 class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
     selector = JSONField(default=dict)
     replicas = models.IntegerField(default=1)
-    pod_template = models.ForeignKey('KubernetesPodTemplate', on_delete=models.CASCADE)
+    pod_template = models.ForeignKey('KubernetesPodTemplate',
+        on_delete=models.CASCADE
+    )
 
     def get_obj(self):
         return client.V1Deployment(
@@ -369,7 +414,9 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
 
 
 class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
-    pod_template = models.ForeignKey('KubernetesPodTemplate', on_delete=models.CASCADE)
+    pod_template = models.ForeignKey('KubernetesPodTemplate',
+        on_delete=models.CASCADE
+    )
     backoff_limit = models.IntegerField(default=3)
 
     def get_obj(self):
@@ -459,7 +506,9 @@ class KubernetesService(KubernetesNetworkingBase):
 class KubernetesIngress(KubernetesNetworkingBase):
     hostname = models.CharField(max_length=255, default="localhost")
     path = models.CharField(max_length=255, default="/")
-    target_service = models.ForeignKey('KubernetesService', on_delete=models.CASCADE)
+    target_service = models.ForeignKey('KubernetesService',
+        on_delete=models.CASCADE
+    )
 
     def get_obj(self):
         return client.NetworkingV1beta1Ingress(
