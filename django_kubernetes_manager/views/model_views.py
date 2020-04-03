@@ -45,11 +45,11 @@ class KubernetesNamespaceViewSet(viewsets.ModelViewSet):
         return Response(KubernetesNamespace.objects.get(pk=kwargs['pk']).deploy())
 
     @action(methods=['post', 'get'], detail=True)
-    def k_delete(self, request, *args, **kwargs):
+    def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes namespace from the cluster.
         """
-        return Response(KubernetesNamespace.objects.get(pk=kwargs['pk']).k_delete())
+        return Response(KubernetesNamespace.objects.get(pk=kwargs['pk']).remove())
 
 
 
@@ -69,11 +69,11 @@ class KubernetesConfigMapViewSet(viewsets.ModelViewSet):
         return Response(KubernetesConfigMap.objects.get(pk=kwargs['pk']).deploy())
 
     @action(methods=['post', 'get'], detail=True)
-    def k_delete(self, request, *args, **kwargs):
+    def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes ConfigMap from the cluster.
         """
-        return Response(KubernetesConfigMap.objects.get(pk=kwargs['pk']).k_delete())
+        return Response(KubernetesConfigMap.objects.get(pk=kwargs['pk']).remove())
 
 
 
@@ -133,11 +133,11 @@ class KubernetesDeploymentViewSet(viewsets.ModelViewSet):
         return Response(KubernetesDeployment.objects.get(pk=kwargs['pk']).deploy())
 
     @action(methods=['post', 'get'], detail=True)
-    def k_delete(self, request, *args, **kwargs):
+    def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes resource from the cluster/namespaces
         """
-        return Response(KubernetesDeployment.objects.get(pk=kwargs['pk']).k_delete())
+        return Response(KubernetesDeployment.objects.get(pk=kwargs['pk']).remove())
 
     @action(methods=['post', 'get'], detail=True)
     def pod_usage(self, request, *args, **kwargs):
@@ -164,11 +164,11 @@ class KubernetesServiceViewSet(viewsets.ModelViewSet):
         return Response(KubernetesService.objects.get(pk=kwargs['pk']).deploy())
 
     @action(methods=['post', 'get'], detail=True)
-    def k_delete(self, request, *args, **kwargs):
+    def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes resource from the cluster/namespace.
         """
-        return Response(KubernetesService.objects.get(pk=kwargs['pk']).k_delete())
+        return Response(KubernetesService.objects.get(pk=kwargs['pk']).remove())
 
 
 
@@ -188,11 +188,11 @@ class KubernetesIngressViewSet(viewsets.ModelViewSet):
         return Response(KubernetesIngress.objects.get(pk=kwargs['pk']).deploy())
 
     @action(methods=['post', 'get'], detail=True)
-    def k_delete(self, request, *args, **kwargs):
+    def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes resource from the cluster/namespace.
         """
-        return Response(KubernetesIngress.objects.get(pk=kwargs['pk']).k_delete())
+        return Response(KubernetesIngress.objects.get(pk=kwargs['pk']).remove())
 
 
 
@@ -212,11 +212,11 @@ class KubernetesJobViewSet(viewsets.ModelViewSet):
         return Response(KubernetesJob.objects.get(pk=kwargs['pk']).deploy())
 
     @action(methods=['post', 'get'], detail=True)
-    def k_delete(self, request, *args, **kwargs):
+    def remove(self, request, *args, **kwargs):
         """
         Action to delete the kubernetes resource from the target cluster/ns.
         """
-        return Response(KubernetesJob.objects.get(pk=kwargs['pk']).k_delete())
+        return Response(KubernetesJob.objects.get(pk=kwargs['pk']).remove())
 
     @action(methods=['post', 'get'], detail=True)
     def pod_usage(self, request, *args, **kwargs):

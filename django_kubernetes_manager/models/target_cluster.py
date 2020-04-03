@@ -17,7 +17,13 @@ TELEMETRY_SOURCE = (("p", "Prometheus"),)
 
 
 class TargetCluster(TitleSlugDescriptionModel):
-
+    """
+    TargetCluster
+    :type: model
+    :description: Holds data related to a cluster context.
+    :inherits: django_extensions.db.models.TitleSlugDescriptionModel
+    :fields: api_endpoint, telemetry_endpoint, telemetry_source, config
+    """
     api_endpoint = models.URLField(help_text="Cluster Endpoint URL")
     telemetry_endpoint = models.URLField(help_text="Telemetry Endpoint URL")
     telemetry_source = models.CharField(max_length=5, default="p",
