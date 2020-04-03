@@ -50,7 +50,6 @@ class KubernetesTelemetryMixin(models.Model):
         help_text="Average PIT bytes consumed")
     cpu_usage_seconds = models.DecimalField(null=True, blank=True, max_digits=8,
         decimal_places=4, help_text="Average cpu usage * seconds live")
-    )
     mem_usage_seconds = models.IntegerField(null=True, blank=True,
         help_text="Average mem usage * seconds live")
 
@@ -224,7 +223,7 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
         """
         :description: Generate namespace spec.
         """
-         return client.V1Namespace(
+        return client.V1Namespace(
             api_version = self.api_version,
             kind = self.kind,
             metadata=client.V1ObjectMeta(
