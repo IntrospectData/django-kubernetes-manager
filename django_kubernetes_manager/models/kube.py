@@ -3,12 +3,10 @@ from time import sleep
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-
 from django_kubernetes_manager.consts import PULL_POLICY, RESTART_POLICY
 from kubernetes import client, config
 
-from .base import (KubernetesBase, KubernetesMetadataObjBase,
-                   KubernetesNetworkingBase)
+from .base import KubernetesBase, KubernetesMetadataObjBase, KubernetesNetworkingBase
 from .mixins import KubernetesTelemetryMixin
 
 
@@ -20,6 +18,7 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
     :inherits: django_kubernetes_manager.models.base.KubernetesBase
     :fields: api_version, kind, exists
     """
+
     api_version = models.CharField(max_length=16, default="v1")
     kind = models.CharField(max_length=16, default="Namespace")
     exists = models.BooleanField(default=False)
@@ -29,15 +28,11 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
         :description: Generate namespace spec.
         """
         return client.V1Namespace(
-            api_version = self.api_version,
-            kind = self.kind,
-            metadata=client.V1ObjectMeta(
-                name = self.slug,
-                labels=self.labels,
-                annotations=self.annotations
-            ),
-            spec = client.V1NamespaceSpec()
-         )
+            api_version=self.api_version,
+            kind=self.kind,
+            metadata=client.V1ObjectMeta(name=self.slug, labels=self.labels, annotations=self.annotations),
+            spec=client.V1NamespaceSpec(),
+        )
 
     def deploy(self):
         """
@@ -45,9 +40,7 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
         """
         api_instance = self.get_client(API=client.CoreV1Api)
         body = self.get_obj()
-        api_response = api_instance.create_namespace(
-            body = body,
-        )
+        api_response = api_instance.create_namespace(body=body,)
         self.exists = True
         self.save()
         return str(api_response.status)
@@ -57,13 +50,10 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
         :description: Delete namespace from cluster.
         """
         api_instance = self.get_client(API=client.CoreV1Api)
-        api_response = api_instance.delete_namespace(
-            name = self.slug,
-        )
+        api_response = api_instance.delete_namespace(name=self.slug,)
         self.exists = False
         self.save()
         return str(api_response.status)
-
 
 
 class KubernetesVolume(KubernetesBase):
@@ -74,22 +64,14 @@ class KubernetesVolume(KubernetesBase):
     :inherits: django_kubernetes_manager.models.base.KubernetesBase
     :fields: *
     """
+
     def get_obj(self):
         """
         :description: Generate volume spec.
         """
         if self.config.get("configmap"):
-            return client.V1Volume(
-                name=self.slug,
-                config_map=client.V1ConfigMapVolumeSource(
-                    name = self.config.get("configmap")
-                )
-            )
-        return client.V1Volume(
-            name=self.slug,
-            empty_dir=client.V1EmptyDirVolumeSource()
-        )
-
+            return client.V1Volume(name=self.slug, config_map=client.V1ConfigMapVolumeSource(name=self.config.get("configmap")))
+        return client.V1Volume(name=self.slug, empty_dir=client.V1EmptyDirVolumeSource())
 
 
 class KubernetesVolumeMount(KubernetesBase):
@@ -100,21 +82,15 @@ class KubernetesVolumeMount(KubernetesBase):
     :inherits: django_kubernetes_manager.models.base.KubernetesBase
     :fields: mount_path, sub_path
     """
+
     mount_path = models.CharField(max_length=255, default="/media")
-    sub_path = models.CharField(max_length=255, default=None, null=True,
-        blank=True
-    )
+    sub_path = models.CharField(max_length=255, default=None, null=True, blank=True)
 
     def get_obj(self):
         """
         :description: Generate mount spec.
         """
-        return client.V1VolumeMount(
-            name=self.slug,
-            mount_path=self.mount_path,
-            sub_path=self.sub_path
-        )
-
+        return client.V1VolumeMount(name=self.slug, mount_path=self.mount_path, sub_path=self.sub_path)
 
 
 class KubernetesContainer(KubernetesBase):
@@ -126,43 +102,33 @@ class KubernetesContainer(KubernetesBase):
     :fields: image_name, image_tag, image_pull_policy, command, args, port,
         volume_mount
     """
-    image_name = models.CharField(max_length=200, db_index=True,
-        help_text="Properly qualified image name.",
-        default="debian"
-    )
-    image_tag = models.CharField(max_length=100, db_index=True,
-        help_text="Tag name for the image to be used for this job",
-        default="latest"
-    )
-    image_pull_policy = models.CharField(max_length=16, choices=PULL_POLICY,
-        default='IfNotPresent'
-    )
-    command = models.TextField(help_text="Command to run when start container",
-        null=True, blank=True
-    )
-    args = models.TextField(help_text="Comma separated args to run with command\
-        when instantiating container.", null=True, blank=True
+
+    image_name = models.CharField(max_length=200, db_index=True, help_text="Properly qualified image name.", default="debian")
+    image_tag = models.CharField(max_length=100, db_index=True, help_text="Tag name for the image to be used for this job", default="latest")
+    image_pull_policy = models.CharField(max_length=16, choices=PULL_POLICY, default="IfNotPresent")
+    command = models.TextField(help_text="Command to run when start container", null=True, blank=True)
+    args = models.TextField(
+        help_text="Comma separated args to run with command\
+        when instantiating container.",
+        null=True,
+        blank=True,
     )
     port = models.IntegerField(default=80)
-    volume_mount = models.ForeignKey('KubernetesVolumeMount', null=True,
-        blank=True, on_delete=models.SET_NULL)
+    volume_mount = models.ForeignKey("KubernetesVolumeMount", null=True, blank=True, on_delete=models.SET_NULL)
 
     def get_obj(self):
         """
         :description: Generate container spec.
         """
         return client.V1Container(
-            name = self.slug,
-            image = ':'.join([self.image_name, self.image_tag]),
-            image_pull_policy = self.image_pull_policy,
-            ports = [client.V1ContainerPort(container_port=self.port)],
-            volume_mounts = [
-                self.volume_mount.get_obj()
-            ] if self.volume_mount is not None else None,
-            command = [self.command],
-            args = self.args.split(",")
+            name=self.slug,
+            image=":".join([self.image_name, self.image_tag]),
+            image_pull_policy=self.image_pull_policy,
+            ports=[client.V1ContainerPort(container_port=self.port)],
+            volume_mounts=[self.volume_mount.get_obj()] if self.volume_mount is not None else None,
+            command=[self.command],
+            args=self.args.split(","),
         )
-
 
 
 class KubernetesConfigMap(KubernetesMetadataObjBase):
@@ -173,29 +139,22 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
     :inherits: django_kubernetes_manager.models.base.KubernetesMetadataObjBase
     :fields: kind, data, binary, override_name, namespace
     """
+
     kind = models.CharField(max_length=16, default="ConfigMap")
     data = JSONField(default=dict, null=True, blank=True)
     binary = models.BinaryField(null=True, blank=True)
-    override_name = models.CharField(max_length=32, null=True, blank=True,
-        default="ConfigMap")
-    namespace = models.ForeignKey("KubernetesNamespace",
-        on_delete=models.CASCADE)
+    override_name = models.CharField(max_length=32, null=True, blank=True, default="ConfigMap")
+    namespace = models.ForeignKey("KubernetesNamespace", on_delete=models.CASCADE)
 
     def get_obj(self):
         """
         :description: Generate configmap spec.
         """
         return client.V1ConfigMap(
-            metadata=client.V1ObjectMeta(
-                name = self.slug,
-                labels=self.labels,
-                annotations=self.annotations
-            ),
-            kind = self.kind,
-            data = self.data if self.data else None,
-            binary_data = {
-                str(self.override_name): self.binary
-            } if self.binary else None
+            metadata=client.V1ObjectMeta(name=self.slug, labels=self.labels, annotations=self.annotations),
+            kind=self.kind,
+            data=self.data if self.data else None,
+            binary_data={str(self.override_name): self.binary} if self.binary else None,
         )
 
     def deploy(self):
@@ -204,10 +163,7 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
         """
         api_instance = self.get_client(API=client.CoreV1Api)
         body = self.get_obj()
-        api_response = api_instance.create_namespaced_config_map(
-            body = body,
-            namespace = self.namespace.slug
-        )
+        api_response = api_instance.create_namespaced_config_map(body=body, namespace=self.namespace.slug)
         self.kuid = api_response.metadata.uid
         self.save()
         return str(api_response.status)
@@ -217,14 +173,10 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
         :description: Delete configmap from namespace.
         """
         api_instance = self.get_client(API=client.CoreV1Api)
-        api_response = api_instance.delete_namespaced_config_map(
-            name = self.slug,
-            namespace = self.namespace.slug
-        )
+        api_response = api_instance.delete_namespaced_config_map(name=self.slug, namespace=self.namespace.slug)
         self.kuid = None
         self.save()
         return str(api_response.status)
-
 
 
 class KubernetesPodTemplate(KubernetesMetadataObjBase):
@@ -235,44 +187,26 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
     :inherits: django_kubernetes_manager.models.base.KubernetesMetadataObjBase
     :fields: volume, primary_container, secondary_container, restart_policy
     """
-    volume = models.ForeignKey('KubernetesVolume', null=True, blank=True,
-        on_delete=models.SET_NULL
-    )
-    primary_container = models.ForeignKey('KubernetesContainer',
-        on_delete=models.CASCADE, related_name='primary_container'
-    )
-    secondary_container = models.ForeignKey('KubernetesContainer', null=True,
-        blank=True, on_delete=models.SET_NULL,
-        related_name='secondary_container'
-    )
-    restart_policy = models.CharField(max_length=16, choices=RESTART_POLICY,
-        default='Never'
-    )
+
+    volume = models.ForeignKey("KubernetesVolume", null=True, blank=True, on_delete=models.SET_NULL)
+    primary_container = models.ForeignKey("KubernetesContainer", on_delete=models.CASCADE, related_name="primary_container")
+    secondary_container = models.ForeignKey("KubernetesContainer", null=True, blank=True, on_delete=models.SET_NULL, related_name="secondary_container")
+    restart_policy = models.CharField(max_length=16, choices=RESTART_POLICY, default="Never")
 
     def get_obj(self):
         """
         :description: Generate pod spec.
         """
         return client.V1PodTemplateSpec(
-            metadata=client.V1ObjectMeta(
-                name = self.slug,
-                labels=self.labels,
-                annotations=self.annotations
-            ),
+            metadata=client.V1ObjectMeta(name=self.slug, labels=self.labels, annotations=self.annotations),
             spec=client.V1PodSpec(
-                volumes=[
-                    self.volume.get_obj()
-                ] if self.volume is not None else None,
-                containers=[
-                    self.primary_container.get_obj(),
-                    self.secondary_container.get_obj()
-                ] if self.secondary_container is not None else [
-                    self.primary_container.get_obj()
-                ],
-                restart_policy = self.restart_policy
-            )
+                volumes=[self.volume.get_obj()] if self.volume is not None else None,
+                containers=[self.primary_container.get_obj(), self.secondary_container.get_obj()]
+                if self.secondary_container is not None
+                else [self.primary_container.get_obj()],
+                restart_policy=self.restart_policy,
+            ),
         )
-
 
 
 class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
@@ -284,11 +218,10 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         django_kubernetes_manager.models.base.KubernetesTelemetryMixin
     :fields: selector, replicas, pod_template
     """
+
     selector = JSONField(default=dict)
     replicas = models.IntegerField(default=1)
-    pod_template = models.ForeignKey('KubernetesPodTemplate',
-        on_delete=models.CASCADE
-    )
+    pod_template = models.ForeignKey("KubernetesPodTemplate", on_delete=models.CASCADE)
 
     def get_obj(self):
         """
@@ -297,16 +230,8 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         return client.V1Deployment(
             api_version=self.api_version,
             kind=self.kind,
-            metadata=client.V1ObjectMeta(
-                name = self.slug,
-                labels=self.labels,
-                annotations=self.annotations
-            ),
-            spec=client.V1DeploymentSpec(
-                selector=client.V1LabelSelector(match_labels=self.selector),
-                replicas=self.replicas,
-                template=self.pod_template.get_obj()
-            )
+            metadata=client.V1ObjectMeta(name=self.slug, labels=self.labels, annotations=self.annotations),
+            spec=client.V1DeploymentSpec(selector=client.V1LabelSelector(match_labels=self.selector), replicas=self.replicas, template=self.pod_template.get_obj()),
         )
 
     def deploy(self):
@@ -315,19 +240,12 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         """
         api_instance = self.get_client(API=client.AppsV1Api)
         body = self.get_obj()
-        api_response = api_instance.create_namespaced_deployment(
-            body = body,
-            namespace = self.namespace.slug
-        )
+        api_response = api_instance.create_namespaced_deployment(body=body, namespace=self.namespace.slug)
         ticker = 0
         while self.status().unavailable_replicas > 0:
             if ticker >= self.config.get("timeout", 60):
-                raise Exception(
-                    'Timeout: no replicas available after {} ticks'.format(
-                        str(ticker)
-                    )
-                )
-            ticker +=1
+                raise Exception("Timeout: no replicas available after {} ticks".format(str(ticker)))
+            ticker += 1
             sleep(1)
         self.kuid = api_response.metadata.uid
         self.save()
@@ -338,14 +256,10 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         :description: Remove deployment from namespace.
         """
         api_instance = self.get_client(API=client.AppsV1Api)
-        api_response = api_instance.delete_namespaced_deployment(
-            name = self.slug,
-            namespace = self.namespace.slug
-        )
+        api_response = api_instance.delete_namespaced_deployment(name=self.slug, namespace=self.namespace.slug)
         self.kuid = None
         self.save()
         return str(api_response.status)
-
 
 
 class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
@@ -357,9 +271,8 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         django_kubernetes_manager.models.base.KubernetesTelemetryMixin
     :fields: selector, replicas, pod_template
     """
-    pod_template = models.ForeignKey('KubernetesPodTemplate',
-        on_delete=models.CASCADE
-    )
+
+    pod_template = models.ForeignKey("KubernetesPodTemplate", on_delete=models.CASCADE)
     backoff_limit = models.IntegerField(default=3)
 
     def get_obj(self):
@@ -369,16 +282,8 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         return client.V1Job(
             api_version=self.api_version,
             kind=self.kind,
-            metadata=client.V1ObjectMeta(
-                name = self.slug,
-                labels = self.labels,
-                annotations = self.annotations
-            ),
-            spec=client.V1JobSpec(
-                template=self.pod_template.get_obj(),
-                backoff_limit=self.backoff_limit,
-                ttl_seconds_after_finished = 10
-            )
+            metadata=client.V1ObjectMeta(name=self.slug, labels=self.labels, annotations=self.annotations),
+            spec=client.V1JobSpec(template=self.pod_template.get_obj(), backoff_limit=self.backoff_limit, ttl_seconds_after_finished=10),
         )
 
     def deploy(self):
@@ -387,10 +292,7 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         """
         api_instance = self.get_client(API=client.BatchV1Api)
         body = self.get_obj()
-        api_response = api_instance.create_namespaced_job(
-            body = body,
-            namespace = self.namespace.slug
-        )
+        api_response = api_instance.create_namespaced_job(body=body, namespace=self.namespace.slug)
         self.kuid = api_response.metadata.uid
         self.save()
         return str(api_response.status)
@@ -400,14 +302,10 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         :description: Remove job from ns.
         """
         api_instance = self.get_client(API=client.BatchV1Api)
-        api_response = api_instance.delete_namespaced_job(
-            name = self.slug,
-            namespace = self.namespace.slug
-        )
+        api_response = api_instance.delete_namespaced_job(name=self.slug, namespace=self.namespace.slug)
         self.kuid = None
         self.save()
         return str(api_response.status)
-
 
 
 class KubernetesService(KubernetesNetworkingBase):
@@ -418,6 +316,7 @@ class KubernetesService(KubernetesNetworkingBase):
     :inherits: django_kubernetes_manager.models.base.KubernetesNetworkingBase
     :fields: selector, target_port
     """
+
     selector = JSONField(default=dict)
     target_port = models.IntegerField(default=80)
 
@@ -426,20 +325,12 @@ class KubernetesService(KubernetesNetworkingBase):
         :description: Generate service spec.
         """
         return client.V1Service(
-            api_version = self.api_version,
-            kind = self.kind,
-            metadata=client.V1ObjectMeta(
-                name = self.slug,
-                labels=self.labels,
-                annotations=self.annotations
-            ),
+            api_version=self.api_version,
+            kind=self.kind,
+            metadata=client.V1ObjectMeta(name=self.slug, labels=self.labels, annotations=self.annotations),
             spec=client.V1ServiceSpec(
-                selector = client.V1LabelSelector(match_labels=self.selector),
-                ports = [client.V1ServicePort(
-                    port=self.port,
-                    target_port=self.target_port
-                )]
-            )
+                selector=client.V1LabelSelector(match_labels=self.selector), ports=[client.V1ServicePort(port=self.port, target_port=self.target_port)]
+            ),
         )
 
     def deploy(self):
@@ -448,10 +339,7 @@ class KubernetesService(KubernetesNetworkingBase):
         """
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
         body = self.get_obj()
-        api_response = api_instance.create_namespaced_service(
-            body = body,
-            namespace = self.namespace.slug
-        )
+        api_response = api_instance.create_namespaced_service(body=body, namespace=self.namespace.slug)
         self.kuid = api_response.metadata.uid
         self.save()
         return str(api_response.status)
@@ -461,14 +349,10 @@ class KubernetesService(KubernetesNetworkingBase):
         :description: Remove service from ns.
         """
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
-        api_response = api_instance.delete_namespaced_service(
-            name = self.slug,
-            namespace = self.namespace.slug
-        )
+        api_response = api_instance.delete_namespaced_service(name=self.slug, namespace=self.namespace.slug)
         self.kuid = None
         self.save()
         return str(api_response.status)
-
 
 
 class KubernetesIngress(KubernetesNetworkingBase):
@@ -479,11 +363,10 @@ class KubernetesIngress(KubernetesNetworkingBase):
     :inherits: django_kubernetes_manager.models.base.KubernetesNetworkingBase
     :fields: hostname, path, target_service
     """
+
     hostname = models.CharField(max_length=255, default="localhost")
     path = models.CharField(max_length=255, default="/")
-    target_service = models.ForeignKey('KubernetesService',
-        on_delete=models.CASCADE
-    )
+    target_service = models.ForeignKey("KubernetesService", on_delete=models.CASCADE)
 
     def get_obj(self):
         """
@@ -492,25 +375,23 @@ class KubernetesIngress(KubernetesNetworkingBase):
         return client.NetworkingV1beta1Ingress(
             api_version=self.api_version,
             kind=self.kind,
-            metadata=client.V1ObjectMeta(
-                name=self.slug,
-                annotations=self.annotations
-            ),
+            metadata=client.V1ObjectMeta(name=self.slug, annotations=self.annotations),
             spec=client.NetworkingV1beta1IngressSpec(
-                selector = client.V1LabelSelector(match_labels=self.selector),
-                rules=[client.NetworkingV1beta1IngressRule(
-                    host=self.hostname,
-                    http=client.NetworkingV1beta1HTTPIngressRuleValue(
-                        paths=[client.NetworkingV1beta1HTTPIngressPath(
-                            path=self.path,
-                            backend=client.NetworkingV1beta1IngressBackend(
-                                service_port=self.target_service.port,
-                                service_name=self.target_service.slug
-                            )
-                        )]
+                selector=client.V1LabelSelector(match_labels=self.selector),
+                rules=[
+                    client.NetworkingV1beta1IngressRule(
+                        host=self.hostname,
+                        http=client.NetworkingV1beta1HTTPIngressRuleValue(
+                            paths=[
+                                client.NetworkingV1beta1HTTPIngressPath(
+                                    path=self.path,
+                                    backend=client.NetworkingV1beta1IngressBackend(service_port=self.target_service.port, service_name=self.target_service.slug),
+                                )
+                            ]
+                        ),
                     )
-                )]
-            )
+                ],
+            ),
         )
 
     def deploy(self):
@@ -519,10 +400,7 @@ class KubernetesIngress(KubernetesNetworkingBase):
         """
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
         body = self.get_obj()
-        api_response = api_instance.create_namespaced_ingress(
-            body = body,
-            namespace = self.namespace.slug
-        )
+        api_response = api_instance.create_namespaced_ingress(body=body, namespace=self.namespace.slug)
         self.kuid = api_response.metadata.uid
         self.save()
         return str(api_response.status)
@@ -532,10 +410,7 @@ class KubernetesIngress(KubernetesNetworkingBase):
         :description: Remove ingress from ns.
         """
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
-        api_response = api_instance.delete_namespaced_ingress(
-            name = self.slug,
-            namespace = self.namespace.slug
-        )
+        api_response = api_instance.delete_namespaced_ingress(name=self.slug, namespace=self.namespace.slug)
         self.kuid = None
         self.save()
         return str(api_response.status)
