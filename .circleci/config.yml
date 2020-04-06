@@ -42,7 +42,7 @@ workflows:
               only: master
             tags:
               ignore: /.*/
-      - docs-latest:
+      - docs-tag:
           filters:
             branches:
               ignore: /.*/
