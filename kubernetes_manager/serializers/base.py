@@ -1,4 +1,4 @@
-from django_kubernetes_manager.models import (
+from kubernetes_manager.models import (
     KubernetesBase,
     KubernetesConfigMap,
     KubernetesContainer,

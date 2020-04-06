@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django_kubernetes_manager.models import (
+from kubernetes_manager.models import (
     KubernetesConfigMap,
     KubernetesContainer,
     KubernetesDeployment,

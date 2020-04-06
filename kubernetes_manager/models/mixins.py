@@ -2,7 +2,7 @@ import json
 import re
 
 from django.db import models
-from django_kubernetes_manager.consts import byte_units
+from kubernetes_manager.consts import byte_units
 from kubernetes import client, config
 
 

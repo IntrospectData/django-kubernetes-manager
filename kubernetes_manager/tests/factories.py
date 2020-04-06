@@ -7,7 +7,7 @@ from faker import Faker
 
 fake = Faker()
 
-models_path = "django_kubernetes_manager."
+models_path = "kubernetes_manager."
 
 microk8s_config = os.getenv("MICROK8S_CF", None)
 

@@ -4,7 +4,7 @@ Serializers
 API Serializers
 ----------------------------------------------
 
-.. automodule:: django_kubernetes_manager.serializers.base
+.. automodule:: kubernetes_manager.serializers.base
    :members:
    :undoc-members:
    :show-inheritance:

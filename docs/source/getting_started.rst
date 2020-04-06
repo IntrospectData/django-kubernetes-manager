@@ -17,7 +17,7 @@ Quickstart
   INSTALLED_APPS = [
     ... ,
     rest_framework,
-    django_kubernetes_manager,
+    kubernetes_manager,
   ]
 
 * In urls.py include the package urls
@@ -26,7 +26,7 @@ Quickstart
 
   urlpatterns = [
     ... ,
-    path('dkm/', include('django_kubernetes_manager.urls')),
+    path('dkm/', include('kubernetes_manager.urls')),
   ]
 
 * Run migrations and start server
