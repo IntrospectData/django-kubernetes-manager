@@ -56,7 +56,7 @@ class KubernetesMetadataObjBase(KubernetesBase):
     KubernetesMetadataObjBase
     :type: model (abstract)
     :description: Extends KubernetesBase to include metadata fields.
-    :inherits: django_kubernetes_manager.models.base.KubernetesBase
+    :inherits: kubernetes_manager.models.base.KubernetesBase
     :fields: labels, annotations
     """
 
@@ -72,7 +72,7 @@ class KubernetesNetworkingBase(KubernetesMetadataObjBase):
     KubernetesNetworkingBase
     :type: model (abstract)
     :description: Extends KubernetesMetadataObjBase to include network fields.
-    :inherits: django_kubernetes_manager.models.base.KubernetesMetadataObjBase
+    :inherits: kubernetes_manager.models.base.KubernetesMetadataObjBase
     :fields: labels, annotations
     """
 

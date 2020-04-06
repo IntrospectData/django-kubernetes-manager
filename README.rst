@@ -1,4 +1,8 @@
 
+Django Kubernetes Manager 0.2.12
+=================================
+
+
 .. image:: images/dkm-logo.png
    :width: 600
    :alt: DjangoKubernetesManager
@@ -42,16 +46,16 @@ Install the app using pip::
 
 Getting Started
 ---------------
-1. Add "django_kubernetes_manager" to your INSTALLED_APPS setting like this::
+1. Add "kubernetes_manager" to your INSTALLED_APPS setting like this::
 
     INSTALLED_APPS = [
         ...
-        'django_kubernetes_manager',
+        'kubernetes_manager',
     ]
 
-2. Include the django_kubernetes_manager URLconf in your project urls.py like this::
+2. Include the kubernetes_manager URLconf in your project urls.py like this::
 
-    path('dkm/', include('django_kubernetes_manager.urls')),
+    path('dkm/', include('kubernetes_manager.urls')),
 
 3. To create models in your database, run::
 

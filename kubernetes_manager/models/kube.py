@@ -3,7 +3,7 @@ from time import sleep
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django_kubernetes_manager.consts import PULL_POLICY, RESTART_POLICY
+from kubernetes_manager.consts import PULL_POLICY, RESTART_POLICY
 from kubernetes import client, config
 
 from .base import KubernetesBase, KubernetesMetadataObjBase, KubernetesNetworkingBase
@@ -15,7 +15,7 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
     KubernetesNamespace
     :type: model
     :description: Holds data related to a Kubernetes namespace.
-    :inherits: django_kubernetes_manager.models.base.KubernetesBase
+    :inherits: kubernetes_manager.models.base.KubernetesBase
     :fields: api_version, kind, exists
     """
 
@@ -61,7 +61,7 @@ class KubernetesVolume(KubernetesBase):
     KubernetesVolume
     :type: model
     :description: Holds data related to a kubernetes volume.
-    :inherits: django_kubernetes_manager.models.base.KubernetesBase
+    :inherits: kubernetes_manager.models.base.KubernetesBase
     :fields: *
     """
 
@@ -79,7 +79,7 @@ class KubernetesVolumeMount(KubernetesBase):
     KubernetesVolumeMount
     :type: model
     :description: Holds data related to a kubernetes volume mount.
-    :inherits: django_kubernetes_manager.models.base.KubernetesBase
+    :inherits: kubernetes_manager.models.base.KubernetesBase
     :fields: mount_path, sub_path
     """
 
@@ -98,7 +98,7 @@ class KubernetesContainer(KubernetesBase):
     KubernetesContainer
     :type: model
     :description: Holds data related to a kubernetes contaienr.
-    :inherits: django_kubernetes_manager.models.base.KubernetesBase
+    :inherits: kubernetes_manager.models.base.KubernetesBase
     :fields: image_name, image_tag, image_pull_policy, command, args, port,
         volume_mount
     """
@@ -136,7 +136,7 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
     KubernetesConfigMap
     :type: model
     :description: Holds data related to a kubernetes volume mount.
-    :inherits: django_kubernetes_manager.models.base.KubernetesMetadataObjBase
+    :inherits: kubernetes_manager.models.base.KubernetesMetadataObjBase
     :fields: kind, data, binary, override_name, namespace
     """
 
@@ -184,7 +184,7 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
     KubernetesPodTemplate
     :type: model
     :description: Holds data related to a kubernetes pod spec.
-    :inherits: django_kubernetes_manager.models.base.KubernetesMetadataObjBase
+    :inherits: kubernetes_manager.models.base.KubernetesMetadataObjBase
     :fields: volume, primary_container, secondary_container, restart_policy
     """
 
@@ -214,8 +214,8 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
     KubernetesDeployment
     :type: model
     :description: Holds data related to a kubernetes deployment.
-    :inherits: django_kubernetes_manager.models.base.KubernetesNetworkingBase,
-        django_kubernetes_manager.models.base.KubernetesTelemetryMixin
+    :inherits: kubernetes_manager.models.base.KubernetesNetworkingBase,
+        kubernetes_manager.models.base.KubernetesTelemetryMixin
     :fields: selector, replicas, pod_template
     """
 
@@ -267,8 +267,8 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
     KubernetesJob
     :type: model
     :description: Holds data related to a kubernetes pod spec.
-    :inherits: django_kubernetes_manager.models.base.KubernetesNetworkingBase,
-        django_kubernetes_manager.models.base.KubernetesTelemetryMixin
+    :inherits: kubernetes_manager.models.base.KubernetesNetworkingBase,
+        kubernetes_manager.models.base.KubernetesTelemetryMixin
     :fields: selector, replicas, pod_template
     """
 
@@ -313,7 +313,7 @@ class KubernetesService(KubernetesNetworkingBase):
     KubernetesService
     :type: model
     :description: Holds data related to a kubernetes service.
-    :inherits: django_kubernetes_manager.models.base.KubernetesNetworkingBase
+    :inherits: kubernetes_manager.models.base.KubernetesNetworkingBase
     :fields: selector, target_port
     """
 
@@ -360,7 +360,7 @@ class KubernetesIngress(KubernetesNetworkingBase):
     KubernetesIngress
     :type: model
     :description: Holds data related to a kubernetes ingress.
-    :inherits: django_kubernetes_manager.models.base.KubernetesNetworkingBase
+    :inherits: kubernetes_manager.models.base.KubernetesNetworkingBase
     :fields: hostname, path, target_service
     """
 

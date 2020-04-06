@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django_kubernetes_manager",
+    "kubernetes_manager",
     "rest_framework",
     "drf_yasg",
 ]
