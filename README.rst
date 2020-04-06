@@ -1,5 +1,5 @@
 
-Django Kubernetes Manager 0.2.12
+Django Kubernetes Manager 0.3.0
 =================================
 
 
