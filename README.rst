@@ -1,4 +1,8 @@
 
+Django Kubernetes Manager 0.2.12
+=================================
+
+
 .. image:: images/dkm-logo.png
    :width: 600
    :alt: DjangoKubernetesManager
