@@ -41,6 +41,12 @@ workflows:
             branches:
               only: master
             tags:
+              ignore: /.*/
+      - docs-latest:
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
               only: /^\d+\.\d+\.\d+$/
       - build:
           filters:

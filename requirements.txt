@@ -12,3 +12,4 @@ sphinx_rtd_theme
 Sphinx
 sphinxcontrib-openapi
 sphinxcontrib-httpdomain
+bumpversion
