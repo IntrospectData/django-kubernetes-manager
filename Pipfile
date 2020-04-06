@@ -6,11 +6,14 @@ verify_ssl = true
 [dev-packages]
 factory_boy ='*'
 faker ='*'
+isort = "*"
+black = "==19.10b0"
+bumpversion = "*"
 
 [packages]
 kubernetes ="*"
 django ="*"
-psycopg2 ="*"
+psycopg2-binary ="*"
 django_extensions ='*'
 drf-yasg = "*"
 djangorestframework = "*"

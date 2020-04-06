@@ -1,0 +1,95 @@
+version: "2"         # required to adjust maintainability checks
+checks:
+  argument-count:
+    config:
+      threshold: 8
+  complex-logic:
+    config:
+      threshold: 15
+  file-lines:
+    config:
+      threshold: 500
+  method-complexity:
+    config:
+      threshold: 15
+  method-count:
+    config:
+      threshold: 20
+  method-lines:
+    config:
+      threshold: 50
+  nested-control-flow:
+    config:
+      threshold: 6
+  return-statements:
+    config:
+      threshold: 4
+  similar-code:
+    config:
+      threshold: # language-specific defaults. an override will affect all languages.
+  identical-code:
+    config:
+      threshold: # language-specific defaults. an override will affect all languages.
+
+plugins:
+  bandit:
+    enabled: true
+    config:
+      python_version: 3
+  sonar-python:
+    enabled: true
+    config:
+      python_version: 3
+  radon:
+    enabled: true
+    config:
+      python_version: 3
+      threshold: "C"
+  pep8:
+    enabled: true
+    config:
+      python_version: 3
+  pylint:
+    enabled: true
+    channel: "beta"
+    plugins:
+      - django
+    config:
+      python_version: 3
+  markdownlint:
+    enabled: true
+  git-legal:
+    enabled: true
+    config:
+      allow_affero_copyleft: false
+      allow_strong_copyleft: false
+      allow_weak_copyleft: false
+      license_whitelist:
+        - Apache
+        - MIT
+  fixme:
+    enabled: true
+  shellcheck:
+    enabled: true
+exclude_patterns:
+  - "config/"
+  - "db/"
+  - "dist/"
+  - "features/"
+  - "**/node_modules/"
+  - "script/"
+  - "**/spec/"
+  - "**/test/"
+  - "**/tests/"
+  - "**/vendor/"
+  - "**/*.d.ts"
+  - "**/static/**/*"
+  - "**/migrations/*"
+  - "_templates/*"
+  - ".venv/*"
+  - ".git/*"
+  - ".idea/*"
+  - "test/*"
+  - "*.tar.gz"
+  - "**/*.tar.gz"
+  - "**/*.pyc"
