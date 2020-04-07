@@ -74,13 +74,13 @@ class KubernetesConfigMapSerializer(KubernetesMetadataObjBaseSerializer):
 class KubernetesContainerSerializer(KubernetesBaseSerializer):
     class Meta:
         model = KubernetesContainer
-        fields = KubernetesBaseSerializer.Meta.fields + ["image_name", "image_tag", "image_pull_policy", "command", "args", "port", "volume_mount"]
+        fields = KubernetesBaseSerializer.Meta.fields + ["image_name", "image_tag", "image_pull_policy", "command", "args", "port", "volume_mounts"]
 
 
 class KubernetesPodTemplateSerializer(KubernetesMetadataObjBaseSerializer):
     class Meta:
         model = KubernetesPodTemplate
-        fields = KubernetesMetadataObjBaseSerializer.Meta.fields + ["volume", "primary_container", "secondary_container", "restart_policy"]
+        fields = KubernetesMetadataObjBaseSerializer.Meta.fields + ["volumes", "containers", "restart_policy"]
 
 
 class KubernetesDeploymentSerializer(KubernetesNetworkingBaseSerializer):

@@ -128,7 +128,11 @@ class KubernetesPodTemplateTestCase(TestCase):
         self.assertIsNotNone(obj.pk)
 
     def test_get_obj(self):
-        obj = KubernetesPodTemplateFactory()
+        obj = KubernetesPodTemplateFactory(
+            containers=(
+                KubernetesContainerFactory(), KubernetesContainerFactory()
+            )
+        )
         obj = obj.get_obj()
         self.assertIsNotNone(obj)
 

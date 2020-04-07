@@ -98,7 +98,6 @@ class KubernetesContainerFactory(DMF):
     command = "/bin/sh"
     args = "-c,echo SUCCESS"
     port = factory.fuzzy.FuzzyChoice([80, 8080, 8000])
-    volume_mount = None
 
 
 class KubernetesPodTemplateFactory(DMF):
@@ -113,10 +112,18 @@ class KubernetesPodTemplateFactory(DMF):
     removed = None
     labels = {"app": fake.word()}
     annotations = None
-    volume = None
-    primary_container = factory.SubFactory(KubernetesContainerFactory)
-    secondary_container = None
     restart_policy = "Always"
+
+    @factory.post_generation
+    def containers(self, create, containers, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if containers:
+            # A list of groups were passed in, use them
+            for container in containers:
+                self.containers.add(container)
 
 
 class KubernetesDeploymentFactory(DMF):
