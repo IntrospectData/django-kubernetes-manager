@@ -125,6 +125,18 @@ class KubernetesPodTemplateFactory(DMF):
             for container in containers:
                 self.containers.add(container)
 
+    @factory.post_generation
+    def volumes(self, create, volumes, **kwargs):
+        if not create:
+            # Simple build, do nothing.
+            return
+
+        if volumes:
+            # A list of groups were passed in, use them
+            for volume in volumes:
+                self.volumes.add(volume)
+
+
 
 class KubernetesDeploymentFactory(DMF):
     class Meta:
