@@ -1,3 +1,6 @@
+import random
+import string
+
 from django.test import TestCase
 
 from .factories import (
@@ -123,12 +126,24 @@ class KubernetesContainerTestCase(TestCase):
 
 class KubernetesPodTemplateTestCase(TestCase):
     def test_model(self):
-        obj = KubernetesPodTemplateFactory()
+        rstr = ''.join(random.choices(string.ascii_lowercase + string.digits, k = 7))
+        obj = KubernetesPodTemplateFactory(
+            containers=(
+                KubernetesContainerFactory(title=rstr), KubernetesContainerFactory(title=rstr+"-2")
+            ),
+            volumes=(
+                KubernetesVolumeFactory(title=rstr), KubernetesVolumeFactory(title=rstr+"-2")
+            )
+        )
         self.assertIsNotNone(obj)
         self.assertIsNotNone(obj.pk)
 
     def test_get_obj(self):
-        obj = KubernetesPodTemplateFactory()
+        obj = KubernetesPodTemplateFactory(
+            containers=(
+                KubernetesContainerFactory(), KubernetesContainerFactory()
+            )
+        )
         obj = obj.get_obj()
         self.assertIsNotNone(obj)
 

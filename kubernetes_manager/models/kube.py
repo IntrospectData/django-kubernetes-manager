@@ -113,8 +113,8 @@ class KubernetesContainer(KubernetesBase):
         null=True,
         blank=True,
     )
-    port = models.IntegerField(default=80)
-    volume_mount = models.ForeignKey("KubernetesVolumeMount", null=True, blank=True, on_delete=models.SET_NULL)
+    port = models.IntegerField(default=80, help_text="Port to expose.")
+    volume_mounts = models.ManyToManyField("KubernetesVolumeMount", null=True, blank=True, help_text="Mounts for any number of volumes")
 
     def get_obj(self):
         """
@@ -125,7 +125,9 @@ class KubernetesContainer(KubernetesBase):
             image=":".join([self.image_name, self.image_tag]),
             image_pull_policy=self.image_pull_policy,
             ports=[client.V1ContainerPort(container_port=self.port)],
-            volume_mounts=[self.volume_mount.get_obj()] if self.volume_mount is not None else None,
+            volume_mounts=[
+                vm.get_obj() for vm in self.volume_mounts.all()
+            ] if self.volume_mounts is not None else None,
             command=[self.command],
             args=self.args.split(","),
         )
@@ -188,10 +190,9 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
     :fields: volume, primary_container, secondary_container, restart_policy
     """
 
-    volume = models.ForeignKey("KubernetesVolume", null=True, blank=True, on_delete=models.SET_NULL)
-    primary_container = models.ForeignKey("KubernetesContainer", on_delete=models.CASCADE, related_name="primary_container")
-    secondary_container = models.ForeignKey("KubernetesContainer", null=True, blank=True, on_delete=models.SET_NULL, related_name="secondary_container")
-    restart_policy = models.CharField(max_length=16, choices=RESTART_POLICY, default="Never")
+    volumes = models.ManyToManyField("KubernetesVolume", null=True, blank=True, help_text="All volumes to be created for a pod.")
+    containers = models.ManyToManyField("KubernetesContainer", help_text="All containers to be included in a pod.")
+    restart_policy = models.CharField(max_length=16, choices=RESTART_POLICY, default="Never", help_text="How the pod should handle restart om case of failures")
 
     def get_obj(self):
         """
@@ -200,10 +201,12 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
         return client.V1PodTemplateSpec(
             metadata=client.V1ObjectMeta(name=self.slug, labels=self.labels, annotations=self.annotations),
             spec=client.V1PodSpec(
-                volumes=[self.volume.get_obj()] if self.volume is not None else None,
-                containers=[self.primary_container.get_obj(), self.secondary_container.get_obj()]
-                if self.secondary_container is not None
-                else [self.primary_container.get_obj()],
+                volumes=[
+                    v.get_obj() for v in self.volumes.all()
+                 ] if self.volumes is not None else None,
+                containers=[
+                    c.get_obj() for c in self.containers.all()
+                ] if self.containers is not None else None,
                 restart_policy=self.restart_policy,
             ),
         )
