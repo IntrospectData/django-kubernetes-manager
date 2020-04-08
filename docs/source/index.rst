@@ -1,6 +1,11 @@
 .. Django Kubernetes Manager documentation master file, created by
    sphinx-quickstart on Tue Mar 10 17:28:38 2020.
 
+
+.. image:: dkm-logo.png
+   :width: 500
+   :alt: DjangoKubernetesManager
+
 Welcome to Django Kubernetes Manager's documentation!
 =====================================================
 Django Kubernetes Manager is an open source project to wrap the complexity of Kubernetes management in the simplicity of Django Rest Framework.

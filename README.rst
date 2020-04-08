@@ -4,7 +4,7 @@ Django Kubernetes Manager 0.4.0
 
 
 .. image:: images/dkm-logo.png
-   :width: 600
+   :width: 500
    :alt: DjangoKubernetesManager
 
 
