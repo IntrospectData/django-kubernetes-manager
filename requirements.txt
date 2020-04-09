@@ -13,3 +13,4 @@ Sphinx
 sphinxcontrib-openapi
 sphinxcontrib-httpdomain
 bumpversion
+coverage
