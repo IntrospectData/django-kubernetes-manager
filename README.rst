@@ -1,12 +1,21 @@
+.. image:: https://api.codeclimate.com/v1/badges/c866017f9bd481a3c9ca/maintainability
+   :target: https://codeclimate.com/github/IntrospectData/django-kubernetes-manager/maintainability
+   :alt: Maintainability
 
-Django Kubernetes Manager 0.4.0
-=================================
+
+.. image:: https://api.codeclimate.com/v1/badges/c866017f9bd481a3c9ca/test_coverage
+   :target: https://codeclimate.com/github/IntrospectData/django-kubernetes-manager/test_coverage
+   :alt: Test Coverage
 
 
 .. image:: images/dkm-logo.png
    :width: 500
    :alt: DjangoKubernetesManager
+   
 
+=================================
+Django Kubernetes Manager 0.4.0
+=================================
 
 Django Kubernetes Manager is an open source project to wrap the complexity of Kubernetes management in the simplicity of Django Rest Framework.
 
