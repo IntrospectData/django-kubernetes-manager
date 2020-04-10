@@ -24,10 +24,9 @@ jobs:
       - run:
           name: Run tests
           command: |
-            mkdir coverage
             ./cc-test-reporter before-build
             coverage run ./manage.py test
-            coverage json -o coverage/.resultset.json
+            coverage xml -o coverage.xml
       - run:
           name: Code Climate Test Coverage
           command: |
