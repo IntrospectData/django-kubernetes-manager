@@ -31,11 +31,9 @@ jobs:
           name: Code Climate Test Coverage
           command: |
             ./cc-test-reporter format-coverage -t coverage.py -o codeclimate.json
-      - persist_to_workspace:
-          paths:
-            - codeclimate.json
       - store_test_results:
-          path: codeclimate.json
+          root: .
+          path: coverage.xml
       - run:
           name: Upload coveragee
           command: |
