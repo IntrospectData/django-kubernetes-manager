@@ -127,9 +127,9 @@ class KubernetesContainer(KubernetesBase):
             ports=[client.V1ContainerPort(container_port=self.port)],
             volume_mounts=[
                 vm.get_obj() for vm in self.volume_mounts.all()
-            ] if self.volume_mounts is not None else None,
-            command=[self.command],
-            args=self.args.split(","),
+            ] if self.volume_mounts else None,
+            command=[self.command] if self.command else None,
+            args=self.args.split(",") if self.args else None,
         )
 
 
@@ -206,7 +206,7 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
                  ] if self.volumes is not None else None,
                 containers=[
                     c.get_obj() for c in self.containers.all()
-                ] if self.containers is not None else None,
+                ] if self.containers else raise RuntimeError("Containers cannot be null"),
                 restart_policy=self.restart_policy,
             ),
         )
