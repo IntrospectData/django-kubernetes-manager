@@ -30,17 +30,16 @@ jobs:
       - run:
           name: Code Climate Test Coverage
           command: |
-            ./cc-test-reporter format-coverage -t coverage.py -o "coverage/codeclimate.$CIRCLE_NODE_INDEX.json"
+            ./cc-test-reporter format-coverage -t coverage.py -o codeclimate.json
       - persist_to_workspace:
-          root: coverage
           paths:
-            - codeclimate.*.json
+            - codeclimate.json
       - store_test_results:
-          path: coverage
+          path: codeclimate.json
       - run:
           name: Upload coveragee
           command: |
-            ./cc-test-reporter sum-coverage --output - codeclimate.*.json | ./cc-test-reporter upload-coverage --debug --input -
+            ./cc-test-reporter sum-coverage --output - codeclimate.json | ./cc-test-reporter upload-coverage --debug --input -
   docs-latest:
     docker:
       - image: curlimages/curl
