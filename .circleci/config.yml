@@ -27,11 +27,11 @@ jobs:
             mkdir coverage
             ./cc-test-reporter before-build
             coverage run ./manage.py test
-            coverage xml -o coverage/.resultset.json
+            coverage json -o coverage/.resultset.json
       - run:
           name: Code Climate Test Coverage
           command: |
-            ./cc-test-reporter format-coverage -t simplecov -o "coverage/codeclimate.$CIRCLE_NODE_INDEX.json"
+            ./cc-test-reporter format-coverage -t coverage.py -o "coverage/codeclimate.$CIRCLE_NODE_INDEX.json"
       - persist_to_workspace:
           root: coverage
           paths:

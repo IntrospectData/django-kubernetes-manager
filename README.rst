@@ -1,3 +1,7 @@
+.. image:: https://circleci.com/gh/IntrospectData/django-kubernetes-manager.svg?style=shield
+    :target: https://circleci.com/gh/IntrospectData/django-kubernetes-manager
+
+
 .. image:: https://api.codeclimate.com/v1/badges/c866017f9bd481a3c9ca/maintainability
    :target: https://codeclimate.com/github/IntrospectData/django-kubernetes-manager/maintainability
    :alt: Maintainability
@@ -11,7 +15,7 @@
 .. image:: images/dkm-logo.png
    :width: 500
    :alt: DjangoKubernetesManager
-   
+
 
 =================================
 Django Kubernetes Manager 0.4.0
