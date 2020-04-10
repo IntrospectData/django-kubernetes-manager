@@ -1,6 +1,18 @@
 .. Django Kubernetes Manager documentation master file, created by
    sphinx-quickstart on Tue Mar 10 17:28:38 2020.
 
+ .. image:: https://circleci.com/gh/IntrospectData/django-kubernetes-manager.svg?style=shield
+     :target: https://circleci.com/gh/IntrospectData/django-kubernetes-manager
+
+
+ .. image:: https://api.codeclimate.com/v1/badges/c866017f9bd481a3c9ca/maintainability
+    :target: https://codeclimate.com/github/IntrospectData/django-kubernetes-manager/maintainability
+    :alt: Maintainability
+
+
+ .. image:: https://api.codeclimate.com/v1/badges/c866017f9bd481a3c9ca/test_coverage
+    :target: https://codeclimate.com/github/IntrospectData/django-kubernetes-manager/test_coverage
+    :alt: Test Coverage
 
 .. image:: dkm-logo.png
    :width: 500
