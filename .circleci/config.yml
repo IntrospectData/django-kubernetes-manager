@@ -24,16 +24,17 @@ jobs:
       - run:
           name: Run tests
           command: |
+            mkdir -p coverage
             ./cc-test-reporter before-build
             coverage run ./manage.py test
             coverage xml -o coverage.xml
+            cp coverage.xml coverage/coverage.xml
       - run:
           name: Code Climate Test Coverage
           command: |
             ./cc-test-reporter format-coverage -t coverage.py -o codeclimate.json
       - store_test_results:
-          root: .
-          path: coverage.xml
+          path: coverage
       - run:
           name: Upload coveragee
           command: |
