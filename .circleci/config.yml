@@ -40,16 +40,6 @@ jobs:
           path: test-results
       - store_artifacts:
           path: test-artifacts
-  upload-coverage:
-    docker:
-      - image: circleci/python:3.8-buster
-    steps:
-      - attach_workspace
-      - run:
-          name: Install Code Climate Test Reporter
-          command: |
-            curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-            chmod +x ./cc-test-reporter
       - run:
           command: |
             ./cc-test-reporter sum-coverage --output - codeclimate.*.json | ./cc-test-reporter upload-coverage --debug --input -
@@ -100,9 +90,6 @@ workflows:
               ignore: /.*/
             tags:
               only: /^\d+\.\d+\.\d+$/
-      - upload-coverage:
-          requires:
-            - test
       - build:
           requires:
             - test
