@@ -24,10 +24,10 @@ jobs:
       - run:
           name: Run tests
           command: |
-            mkdir -p _tests/results _tests/artifacts
+            mkdir coverage
             ./cc-test-reporter before-build
             coverage run ./manage.py test
-            coverage xml -o _tests/results/dkm.xml
+            coverage xml -o coverage/.resultset.json
       - run:
           name: Code Climate Test Coverage
           command: |
@@ -37,10 +37,9 @@ jobs:
           paths:
             - codeclimate.*.json
       - store_test_results:
-          path: test-results
-      - store_artifacts:
-          path: test-artifacts
+          path: coverage
       - run:
+          name: Upload coveragee
           command: |
             ./cc-test-reporter sum-coverage --output - codeclimate.*.json | ./cc-test-reporter upload-coverage --debug --input -
   docs-latest:
