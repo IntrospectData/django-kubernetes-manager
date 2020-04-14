@@ -207,7 +207,7 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
                      ] if self.volumes is not None else None,
                     containers=[
                         c.get_obj() for c in self.containers.all()
-                    ] if self.containers,
+                    ],
                     restart_policy=self.restart_policy,
                 ),
             )
