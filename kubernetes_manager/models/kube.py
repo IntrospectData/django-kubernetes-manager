@@ -198,7 +198,7 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
         """
         :description: Generate pod spec.
         """
-        if containers:
+        if self.containers:
             return client.V1PodTemplateSpec(
                 metadata=client.V1ObjectMeta(name=self.slug, labels=self.labels, annotations=self.annotations),
                 spec=client.V1PodSpec(
