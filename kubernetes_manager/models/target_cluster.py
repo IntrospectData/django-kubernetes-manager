@@ -29,8 +29,7 @@ class TargetCluster(TitleSlugDescriptionModel):
     telemetry_endpoint = models.URLField(help_text="Telemetry Endpoint URL")
     telemetry_source = models.CharField(max_length=5, default="p", choices=TELEMETRY_SOURCE)
     config = JSONField(
-        help_text="Configuration data stored as an encrypted\
-        blob in the database",
+        help_text="Equivalent to .kube/config but all JSON",
         null=True,
     )
 

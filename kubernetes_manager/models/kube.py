@@ -198,18 +198,21 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
         """
         :description: Generate pod spec.
         """
-        return client.V1PodTemplateSpec(
-            metadata=client.V1ObjectMeta(name=self.slug, labels=self.labels, annotations=self.annotations),
-            spec=client.V1PodSpec(
-                volumes=[
-                    v.get_obj() for v in self.volumes.all()
-                 ] if self.volumes is not None else None,
-                containers=[
-                    c.get_obj() for c in self.containers.all()
-                ] if self.containers else raise RuntimeError("Containers cannot be null"),
-                restart_policy=self.restart_policy,
-            ),
-        )
+        if containers:
+            return client.V1PodTemplateSpec(
+                metadata=client.V1ObjectMeta(name=self.slug, labels=self.labels, annotations=self.annotations),
+                spec=client.V1PodSpec(
+                    volumes=[
+                        v.get_obj() for v in self.volumes.all()
+                     ] if self.volumes is not None else None,
+                    containers=[
+                        c.get_obj() for c in self.containers.all()
+                    ] if self.containers,
+                    restart_policy=self.restart_policy,
+                ),
+            )
+        else:
+            raise ValueError("Containers cannot be empty or null")
 
 
 class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
