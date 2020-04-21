@@ -93,3 +93,5 @@ exclude_patterns:
   - "*.tar.gz"
   - "**/*.tar.gz"
   - "**/*.pyc"
+  - "**/*.rst"
+  - "**/*.md"
