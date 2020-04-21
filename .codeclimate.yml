@@ -73,9 +73,14 @@ plugins:
     enabled: true
 exclude_patterns:
   - "config/"
+  - ".github/"
+  - ".circleci/"
   - "db/"
   - "dist/"
   - "features/"
+  - "_django/"
+  - "docs/"
+  - "images/"
   - "**/node_modules/"
   - "script/"
   - "**/spec/"
