@@ -99,7 +99,7 @@ def split_kubeconfig(kubeconfig):
             list(dict)
     """
     if not isinstance(kubeconfig, dict):
-        kubeconfig = yaml.load(kubeconfig, Loader=yaml.FullLoader)
+        kubeconfig = yaml.safe_load(kubeconfig, Loader=yaml.FullLoader)
     ret_val = []
     for context in kubeconfig.get("contexts", []):
         cluster = [x for x in kubeconfig.get("clusters", []) if x.get("name") == context.get("context", {}).get("cluster", "")][0]
