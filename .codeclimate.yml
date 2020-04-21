@@ -57,7 +57,7 @@ plugins:
     config:
       python_version: 3
   markdownlint:
-    enabled: true
+    enabled: false
   git-legal:
     enabled: true
     config:
