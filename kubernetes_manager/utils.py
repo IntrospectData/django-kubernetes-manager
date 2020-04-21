@@ -109,7 +109,7 @@ def split_kubeconfig(kubeconfig):
     return ret_val
 
 
-def coalesce_dicts(target={}, source={}):
+def coalesce_dicts(target=dict, source=dict):
     if source:
         if isinstance(source, bytes):
             source = source.decode("utf-8")
