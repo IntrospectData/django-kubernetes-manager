@@ -57,7 +57,7 @@ plugins:
     config:
       python_version: 3
   markdownlint:
-    enabled: true
+    enabled: false
   git-legal:
     enabled: true
     config:
@@ -73,9 +73,14 @@ plugins:
     enabled: true
 exclude_patterns:
   - "config/"
+  - ".github/"
+  - ".circleci/"
   - "db/"
   - "dist/"
   - "features/"
+  - "_django/"
+  - "docs/"
+  - "images/"
   - "**/node_modules/"
   - "script/"
   - "**/spec/"
@@ -93,3 +98,5 @@ exclude_patterns:
   - "*.tar.gz"
   - "**/*.tar.gz"
   - "**/*.pyc"
+  - "**/*.rst"
+  - "**/*.md"

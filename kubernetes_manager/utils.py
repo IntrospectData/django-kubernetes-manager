@@ -99,7 +99,7 @@ def split_kubeconfig(kubeconfig):
             list(dict)
     """
     if not isinstance(kubeconfig, dict):
-        kubeconfig = yaml.load(kubeconfig, Loader=yaml.FullLoader)
+        kubeconfig = yaml.safe_load(kubeconfig, Loader=yaml.FullLoader)
     ret_val = []
     for context in kubeconfig.get("contexts", []):
         cluster = [x for x in kubeconfig.get("clusters", []) if x.get("name") == context.get("context", {}).get("cluster", "")][0]
@@ -109,7 +109,7 @@ def split_kubeconfig(kubeconfig):
     return ret_val
 
 
-def coalesce_dicts(target={}, source={}):
+def coalesce_dicts(target=dict, source=dict):
     if source:
         if isinstance(source, bytes):
             source = source.decode("utf-8")
