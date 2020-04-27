@@ -73,7 +73,10 @@ jobs:
 workflows:
   main:
     jobs:
-      - test
+      - test:
+          filters:
+            tags:
+              only: /^\d+\.\d+\.\d+$/
       - docs-latest:
           filters:
             branches:
