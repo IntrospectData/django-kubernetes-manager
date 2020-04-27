@@ -114,7 +114,7 @@ class KubernetesContainer(KubernetesBase):
         blank=True,
     )
     port = models.IntegerField(default=80, help_text="Port to expose.")
-    volume_mounts = models.ManyToManyField("KubernetesVolumeMount", null=True, blank=True, help_text="Mounts for any number of volumes")
+    volume_mounts = models.ManyToManyField("KubernetesVolumeMount", blank=True, help_text="Mounts for any number of volumes")
 
     def get_obj(self):
         """
@@ -190,7 +190,7 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
     :fields: volume, primary_container, secondary_container, restart_policy
     """
 
-    volumes = models.ManyToManyField("KubernetesVolume", null=True, blank=True, help_text="All volumes to be created for a pod.")
+    volumes = models.ManyToManyField("KubernetesVolume", blank=True, help_text="All volumes to be created for a pod.")
     containers = models.ManyToManyField("KubernetesContainer", help_text="All containers to be included in a pod.")
     restart_policy = models.CharField(max_length=16, choices=RESTART_POLICY, default="Never", help_text="How the pod should handle restart om case of failures")
 
