@@ -78,11 +78,8 @@ class KubernetesTelemetryMixin(models.Model):
         name = self.slug
         namespace = self.namespace.slug
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
-        try:
-            if type == "kubernetesjob":
-                api_response = api_instance.read_namespaced_job_status(name, namespace)
-            if type == "kubernetesdeployment":
-                api_response = api_instance.read_namespaced_deployment_status(name, namespace)
-            return api_response.status
-        except Exception as e:
-            print(e)
+        if type == "kubernetesjob":
+            api_response = api_instance.read_namespaced_job_status(name, namespace)
+        if type == "kubernetesdeployment":
+            api_response = api_instance.read_namespaced_deployment_status(name, namespace)
+        return api_response.status
