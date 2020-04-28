@@ -83,6 +83,6 @@ class KubernetesTelemetryMixin(models.Model):
                 api_response = api_instance.read_namespaced_job_status(name, namespace)
             if type == "kubernetesdeployment":
                 api_response = api_instance.read_namespaced_deployment_status(name, namespace)
+            return api_response.status
         except Exception as e:
-            return self.status
-        return api_response.status
+            print(e)
