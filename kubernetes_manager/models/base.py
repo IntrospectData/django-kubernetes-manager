@@ -8,7 +8,7 @@ from django_extensions.db.models import TitleSlugDescriptionModel
 from kubernetes import client, config
 
 
-class KubernetesBase(TitleSlugDescriptionModel):
+class KubernetesBase(models.Model):
     """
     KubernetesBase
     :type: model (abstract)
@@ -18,6 +18,7 @@ class KubernetesBase(TitleSlugDescriptionModel):
     """
 
     id = models.UUIDField(default=uuid4, editable=False, primary_key=True, help_text="UUID Auto field.")
+    title = models.CharField(max_length=128)
     cluster = models.ForeignKey("TargetCluster", on_delete=models.SET_NULL, null=True, help_text="ForeignKey to TargetCluster object.")
     config = JSONField(default=dict, null=True, blank=True, help_text="Pass in extra parameters here.")
     deployed = models.DateTimeField(null=True, blank=True, help_text="Time when object is applied to cluster.")
@@ -26,11 +27,15 @@ class KubernetesBase(TitleSlugDescriptionModel):
     class Meta:
         abstract = True
 
-    def slugify_function(self, content):
+    def slugify_function(self):
         """
         :description: Overrides default slugify with custom logic.
         """
         return self.title.replace("_", "-").replace(" ", "-").lower()
+    
+    @property
+    def slug(self):
+        return self.slugify_function()
 
     def get_client(self, API=client.CoreV1Api, **kwargs):
         """Gets a k8s api client
