@@ -18,7 +18,7 @@
 
 
 =================================
-Django Kubernetes Manager 0.4.2
+Django Kubernetes Manager 0.4.3
 =================================
 
 Django Kubernetes Manager is an open source project to wrap the complexity of Kubernetes management in the simplicity of Django Rest Framework.
