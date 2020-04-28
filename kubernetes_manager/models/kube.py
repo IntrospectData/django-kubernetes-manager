@@ -43,7 +43,7 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
         api_response = api_instance.create_namespace(body=body,)
         self.exists = True
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
     def remove(self):
         """
@@ -53,7 +53,7 @@ class KubernetesNamespace(KubernetesMetadataObjBase):
         api_response = api_instance.delete_namespace(name=self.slug,)
         self.exists = False
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
 
 class KubernetesVolume(KubernetesBase):
@@ -168,7 +168,7 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
         api_response = api_instance.create_namespaced_config_map(body=body, namespace=self.namespace.slug)
         self.kuid = api_response.metadata.uid
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
     def remove(self):
         """
@@ -178,7 +178,7 @@ class KubernetesConfigMap(KubernetesMetadataObjBase):
         api_response = api_instance.delete_namespaced_config_map(name=self.slug, namespace=self.namespace.slug)
         self.kuid = None
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
 
 class KubernetesPodTemplate(KubernetesMetadataObjBase):
@@ -255,7 +255,7 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
             sleep(1)
         self.kuid = api_response.metadata.uid
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
     def remove(self):
         """
@@ -265,7 +265,7 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         api_response = api_instance.delete_namespaced_deployment(name=self.slug, namespace=self.namespace.slug)
         self.kuid = None
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
 
 class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
@@ -301,7 +301,7 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         api_response = api_instance.create_namespaced_job(body=body, namespace=self.namespace.slug)
         self.kuid = api_response.metadata.uid
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
     def remove(self):
         """
@@ -311,7 +311,7 @@ class KubernetesJob(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         api_response = api_instance.delete_namespaced_job(name=self.slug, namespace=self.namespace.slug)
         self.kuid = None
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
 
 class KubernetesService(KubernetesNetworkingBase):
@@ -348,7 +348,7 @@ class KubernetesService(KubernetesNetworkingBase):
         api_response = api_instance.create_namespaced_service(body=body, namespace=self.namespace.slug)
         self.kuid = api_response.metadata.uid
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
     def remove(self):
         """
@@ -358,7 +358,7 @@ class KubernetesService(KubernetesNetworkingBase):
         api_response = api_instance.delete_namespaced_service(name=self.slug, namespace=self.namespace.slug)
         self.kuid = None
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
 
 class KubernetesIngress(KubernetesNetworkingBase):
@@ -409,7 +409,7 @@ class KubernetesIngress(KubernetesNetworkingBase):
         api_response = api_instance.create_namespaced_ingress(body=body, namespace=self.namespace.slug)
         self.kuid = api_response.metadata.uid
         self.save()
-        return str(api_response.status)
+        return str(api_response)
 
     def remove(self):
         """
@@ -419,4 +419,4 @@ class KubernetesIngress(KubernetesNetworkingBase):
         api_response = api_instance.delete_namespaced_ingress(name=self.slug, namespace=self.namespace.slug)
         self.kuid = None
         self.save()
-        return str(api_response.status)
+        return str(api_response)
