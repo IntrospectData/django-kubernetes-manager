@@ -248,7 +248,12 @@ class KubernetesDeployment(KubernetesNetworkingBase, KubernetesTelemetryMixin):
         body = self.get_obj()
         api_response = api_instance.create_namespaced_deployment(body=body, namespace=self.namespace.slug)
         ticker = 0
-        while self.status.unavailable_replicas > 0:
+        while True:
+            try:
+                if self.status.available_replicas >= 1:
+                    break
+            except:
+                pass
             if ticker >= self.config.get("timeout", 60):
                 raise Exception("Timeout: no replicas available after {} ticks".format(str(ticker)))
             ticker += 1
