@@ -69,6 +69,7 @@ class KubernetesTelemetryMixin(models.Model):
                 memory += self.parseSize(cmem)
         return {"cpu": cpu, "memory": memory}
 
+    @property
     def status(self):
         """
         :description: Returns status data of object.
@@ -77,8 +78,11 @@ class KubernetesTelemetryMixin(models.Model):
         name = self.slug
         namespace = self.namespace.slug
         api_instance = self.get_client(API=client.ExtensionsV1beta1Api)
-        if type == "kubernetesjob":
-            api_response = api_instance.read_namespaced_job_status(name, namespace)
-        if type == "kubernetesdeployment":
-            api_response = api_instance.read_namespaced_deployment_status(name, namespace)
+        try:
+            if type == "kubernetesjob":
+                api_response = api_instance.read_namespaced_job_status(name, namespace)
+            if type == "kubernetesdeployment":
+                api_response = api_instance.read_namespaced_deployment_status(name, namespace)
+        except Exception as e:
+            return self.status
         return api_response.status
