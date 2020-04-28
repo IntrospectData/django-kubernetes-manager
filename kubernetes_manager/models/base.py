@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
-from django_extensions.db.models import TitleSlugDescriptionModel
+
 from kubernetes import client, config
 
 
