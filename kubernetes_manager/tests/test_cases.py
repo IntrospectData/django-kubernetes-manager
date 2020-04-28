@@ -41,7 +41,6 @@ class KubernetesNamespaceTestCase(TestCase):
             "/namespaces/",
             {
                 "title": str(factory.fuzzy.FuzzyText()),
-                "description": str(factory.fuzzy.FuzzyText()),
                 "cluster": "http://127.0.0.1:8000/dkm/api/clusters/1/",
                 "labels": {"app": "test"},
                 "annotations": {"type": "project"},

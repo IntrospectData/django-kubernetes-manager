@@ -17,7 +17,6 @@ class TargetClusterFactory(DMF):
         model = models_path + "TargetCluster"
 
     title = factory.fuzzy.FuzzyText(length=8, suffix="-cluster")
-    description = fake.sentence()
     api_endpoint = "https://127.0.0.1:16443"
     telemetry_endpoint = "https://127.0.0.1:16443"
     telemetry_source = "p"
@@ -29,7 +28,6 @@ class KubernetesNamespaceFactory(DMF):
         model = models_path + "KubernetesNamespace"
 
     title = factory.fuzzy.FuzzyText(length=8, suffix="-ns")
-    description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
@@ -46,7 +44,6 @@ class KubernetesConfigMapFactory(DMF):
         model = models_path + "KubernetesConfigMap"
 
     title = factory.fuzzy.FuzzyText(length=8, suffix="-cm")
-    description = fake.sentence()
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
@@ -61,7 +58,6 @@ class KubernetesVolumeFactory(DMF):
         model = models_path + "KubernetesVolume"
 
     title = factory.fuzzy.FuzzyText(length=8, suffix="-vol")
-    description = fake.sentence()
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
@@ -73,7 +69,6 @@ class KubernetesVolumeMountFactory(DMF):
         model = models_path + "KubernetesVolumeMount"
 
     title = factory.fuzzy.FuzzyText(length=8, suffix="-mount")
-    description = fake.sentence()
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
@@ -87,7 +82,6 @@ class KubernetesContainerFactory(DMF):
         model = models_path + "KubernetesContainer"
 
     title = factory.fuzzy.FuzzyText(length=8, suffix="-container")
-    description = fake.sentence()
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
@@ -105,7 +99,6 @@ class KubernetesPodTemplateFactory(DMF):
         model = models_path + "KubernetesPodTemplate"
 
     title = factory.fuzzy.FuzzyText(length=8, suffix="-pod")
-    description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
@@ -143,7 +136,6 @@ class KubernetesDeploymentFactory(DMF):
         model = models_path + "KubernetesDeployment"
 
     title = factory.fuzzy.FuzzyText(length=8, suffix="-dep")
-    description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
@@ -165,7 +157,6 @@ class KubernetesJobFactory(DMF):
         model = models_path + "KubernetesJob"
 
     title = factory.fuzzy.FuzzyText(length=8, suffix="-job")
-    description = fake.paragraph(nb_sentences=3, variable_nb_sentences=True)
     cluster = factory.SubFactory(TargetClusterFactory)
     config = {"data_is_fake": "true"}
     deployed = None
