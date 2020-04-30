@@ -194,6 +194,7 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
 
     volumes = models.ManyToManyField("KubernetesVolume", blank=True, help_text="All volumes to be created for a pod.")
     containers = models.ManyToManyField("KubernetesContainer", help_text="All containers to be included in a pod.")
+    init_containers = models.ManyToManyField("KubernetesContainer", help_text="All containers to be included in a pod.", related_name="init_container")
     restart_policy = models.CharField(max_length=16, choices=RESTART_POLICY, default="Never", help_text="How the pod should handle restart om case of failures")
 
     def get_obj(self):
@@ -210,6 +211,9 @@ class KubernetesPodTemplate(KubernetesMetadataObjBase):
                     containers=[
                         c.get_obj() for c in self.containers.all()
                     ],
+                    init_containers=[
+                        i.get_obj() for i in self.init_containers.all()
+                    ] if self.init_containers is not None else None,
                     restart_policy=self.restart_policy,
                 ),
             )
