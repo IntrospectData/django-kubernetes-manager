@@ -130,6 +130,8 @@ class KubernetesContainer(KubernetesBase):
             ] if self.volume_mounts else None,
             command=[self.command] if self.command else None,
             args=self.args.split(",") if self.args else None,
+            env=self.config.get("env") if self.config.get("env", None) else None,
+            env_from=self.config.get("env_from") if self.config.get("env_from", None) else None,
         )
 
 
