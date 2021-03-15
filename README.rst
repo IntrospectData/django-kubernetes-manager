@@ -74,7 +74,7 @@ Getting Started
 
     python manage.py migrate
 
-    * Requires Postgresql or other database with JSON support.
+    * Requires Postgresql
 
 4. Start the development server and visit http://127.0.0.1:8000/admin/
    to configure a TargetCluster (you'll need the Admin app enabled).
